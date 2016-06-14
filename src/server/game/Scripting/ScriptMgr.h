@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -18,7 +18,7 @@
 
 #ifndef SC_SCRIPTMGR_H
 #define SC_SCRIPTMGR_H
-
+#pragma execution_character_set("UTF-8")
 #include "Common.h"
 #include <atomic>
 #include "DBCStores.h"
@@ -375,6 +375,12 @@ class TC_GAME_API ItemScript : public ScriptObject
 
         // Called when the item is destroyed.
         virtual bool OnRemove(Player* /*player*/, Item* /*item*/) { return false; }
+
+		// 物品select函数支持
+		virtual bool OnGossipSelect(Player* /*player*/, Item* /*item*/, uint32 /*sender*/, uint32 /*action*/) { return false; }
+
+		// 物品selectCode函数支持
+		virtual bool OnGossipSelectCode(Player* /*player*/, Item* /*item*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) { return false; }
 };
 
 class TC_GAME_API UnitScript : public ScriptObject
@@ -943,6 +949,9 @@ class TC_GAME_API ScriptMgr
         bool OnItemUse(Player* player, Item* item, SpellCastTargets const& targets);
         bool OnItemExpire(Player* player, ItemTemplate const* proto);
         bool OnItemRemove(Player* player, Item* item);
+		// 物品select函数支持
+		bool OnGossipSelect(Player* player, Item* item, uint32 sender, uint32 action);
+		bool OnGossipSelectCode(Player* player, Item* item, uint32 sender, uint32 action, const char* code);
 
     public: /* CreatureScript */
 

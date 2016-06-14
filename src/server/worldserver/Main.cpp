@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -26,7 +26,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
-
+#pragma execution_character_set("UTF-8")
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "AsyncAcceptor.h"
@@ -133,17 +133,16 @@ extern int main(int argc, char** argv)
     // If logs are supposed to be handled async then we need to pass the io_service into the Log singleton
     sLog->Initialize(sConfigMgr->GetBoolDefault("Log.Async.Enable", false) ? &_ioService : nullptr);
 
-    TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", GitRevision::GetFullVersion());
-    TC_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
-    TC_LOG_INFO("server.worldserver", " ______                       __");
-    TC_LOG_INFO("server.worldserver", "/\\__  _\\       __          __/\\ \\__");
-    TC_LOG_INFO("server.worldserver", "\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
-    TC_LOG_INFO("server.worldserver", "   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
-    TC_LOG_INFO("server.worldserver", "    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
-    TC_LOG_INFO("server.worldserver", "     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
-    TC_LOG_INFO("server.worldserver", "      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
-    TC_LOG_INFO("server.worldserver", "                                 C O R E  /\\___/");
-    TC_LOG_INFO("server.worldserver", "http://TrinityCore.org                    \\/__/\n");
+	TC_LOG_INFO("server.worldserver", "欢迎您选择MachinistWoW模拟器, 世界服务器即将启动:");
+	TC_LOG_INFO("server.worldserver", "---------#-----#------------#-----------------------------------");
+	TC_LOG_INFO("server.worldserver", "--------##----##------------#-----------------------------------");
+	TC_LOG_INFO("server.worldserver", "-------#-#---#-#------------#----#------#-------#---------------");
+	TC_LOG_INFO("server.worldserver", "------#--#--#--#--##----##--###--#--##--#--##--####-------------");
+	TC_LOG_INFO("server.worldserver", "-----#---#-#---#-#--#--#----#--#-#-#--#-#-#-----#---------------");
+	TC_LOG_INFO("server.worldserver", "----#----##----#-#--#--#----#--#-#-#--#-#----#--#-#-------------");
+	TC_LOG_INFO("server.worldserver", "---#-----#-----#--##-#--##--#--#-#-#--#-#--##----#--------------");
+	TC_LOG_INFO("server.worldserver", "----------------------------------------C O R E-----------------");
+	TC_LOG_INFO("server.worldserver", "作者:机械师");
     TC_LOG_INFO("server.worldserver", "Using configuration file %s.", sConfigMgr->GetFilename().c_str());
     TC_LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
     TC_LOG_INFO("server.worldserver", "Using Boost version: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
@@ -262,7 +261,9 @@ extern int main(int argc, char** argv)
         TC_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", coreStuckTime);
     }
 
-    TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", GitRevision::GetFullVersion());
+	TC_LOG_INFO("server.worldserver", "MachinistWoW世界服务器启动完毕(X64版本)...");
+	TC_LOG_INFO("server.worldserver", "购买商业版请联系企鹅：2858558893");
+	TC_LOG_INFO("server.worldserver", "使用<Ctrl-C>停止世界服务器");
 
     sScriptMgr->OnStartup();
 

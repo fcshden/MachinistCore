@@ -427,6 +427,9 @@ ElunaRegister<Unit> UnitMethods[] =
 
 ElunaRegister<Player> PlayerMethods[] =
 {
+	// custom
+	{ "SetState", &LuaPlayer::SetState },
+
     // Getters
     { "GetSelection", &LuaPlayer::GetSelection },
     { "GetGMRank", &LuaPlayer::GetGMRank },

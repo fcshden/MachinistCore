@@ -520,7 +520,7 @@ namespace
 
 		void OnStartup() override
 		{
-			TC_LOG_INFO("custom.transmog", "Deleting non-existing transmogrification entries...");
+			//TC_LOG_INFO("custom.transmog", "Deleting non-existing transmogrification entries...");
 			CharacterDatabase.DirectExecute("DELETE FROM custom_transmogrification WHERE NOT EXISTS (SELECT 1 FROM item_instance WHERE item_instance.guid = custom_transmogrification.GUID)");
 
 #ifdef PRESETS

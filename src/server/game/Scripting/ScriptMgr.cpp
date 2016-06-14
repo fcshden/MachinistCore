@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#pragma execution_character_set("UTF-8")
 #include "ScriptMgr.h"
 #include "ScriptReloadMgr.h"
 #include "Config.h"
@@ -1625,6 +1625,26 @@ bool ScriptMgr::OnGossipSelectCode(Player* player, Creature* creature, uint32 se
 
     GET_SCRIPT_RET(CreatureScript, creature->GetScriptId(), tmpscript, false);
     return tmpscript->OnGossipSelectCode(player, creature, sender, action, code);
+}
+
+/* itemselect的实现*/
+bool ScriptMgr::OnGossipSelect(Player* player, Item* item, uint32 sender, uint32 action)
+{
+	ASSERT(player);
+	ASSERT(item);
+
+	GET_SCRIPT_RET(ItemScript, item->GetScriptId(), tmpscript, false);
+	return tmpscript->OnGossipSelect(player, item, sender, action);
+
+}
+/* itemselect的实现*/
+bool ScriptMgr::OnGossipSelectCode(Player* player, Item* item, uint32 sender, uint32 action, const char* code)
+{
+	ASSERT(player);
+	ASSERT(item);
+
+	GET_SCRIPT_RET(ItemScript, item->GetScriptId(), tmpscript, false);
+	return tmpscript->OnGossipSelectCode(player, item, sender, action, code);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
