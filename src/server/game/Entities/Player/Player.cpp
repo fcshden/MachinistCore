@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma execution_character_set("UTF-8")
+#include "Machinist_VIP_Core.h"
 #include "Transmogrification.h"
 #include "Player.h"
 #include "AccountMgr.h"
@@ -2838,7 +2840,13 @@ void Player::GiveLevel(uint8 level)
 
 void Player::InitTalentForLevel()
 {
+	// VIP天赋加成
+	uint32 acct_id = GetSession()->GetAccountId();
+	uint8 Pvip = VIP::GetVIP(acct_id);
+	uint8 VIP_TP_BONUS = VIP::GetTALENTBONUS();
+	uint8 TPMOD = (Pvip * VIP_TP_BONUS);
     uint8 level = getLevel();
+
     // talents base at level diff (talents = level - 9 but some can be used already)
     if (level < 10)
     {
@@ -2860,7 +2868,8 @@ void Player::InitTalentForLevel()
         uint32 talentPointsForLevel = CalculateTalentsPoints();
 
         // if used more that have then reset
-        if (m_usedTalentCount > talentPointsForLevel)
+        //if (m_usedTalentCount > talentPointsForLevel)
+		if (m_usedTalentCount >(talentPointsForLevel + TPMOD))
         {
             if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_MORE_TALENTS_THAN_ALLOWED))
                 ResetTalents(true);
@@ -2869,7 +2878,8 @@ void Player::InitTalentForLevel()
         }
         // else update amount of free points
         else
-            SetFreeTalentPoints(talentPointsForLevel - m_usedTalentCount);
+            //SetFreeTalentPoints(talentPointsForLevel - m_usedTalentCount);
+			SetFreeTalentPoints((talentPointsForLevel + TPMOD) - m_usedTalentCount);
     }
 
     if (!GetSession()->PlayerLoading())
@@ -3912,6 +3922,12 @@ uint32 Player::ResetTalentsCost() const
 
 bool Player::ResetTalents(bool no_cost)
 {
+	// VIP天赋加成
+	uint32 acct_id = GetSession()->GetAccountId();
+	uint8 Pvip = VIP::GetVIP(acct_id);
+	uint8 VIP_TP_BONUS = VIP::GetTALENTBONUS();
+	uint8 TPMOD = (Pvip * VIP_TP_BONUS);
+
     sScriptMgr->OnPlayerTalentsReset(this, no_cost);
 
     // not need after this call
@@ -3922,7 +3938,8 @@ bool Player::ResetTalents(bool no_cost)
 
     if (m_usedTalentCount == 0)
     {
-        SetFreeTalentPoints(talentPointsForLevel);
+        //SetFreeTalentPoints(talentPointsForLevel);
+		SetFreeTalentPoints(talentPointsForLevel + TPMOD);
         return false;
     }
 
@@ -3984,8 +4001,8 @@ bool Player::ResetTalents(bool no_cost)
     _SaveSpells(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    SetFreeTalentPoints(talentPointsForLevel);
-
+   // SetFreeTalentPoints(talentPointsForLevel);
+	SetFreeTalentPoints(talentPointsForLevel + TPMOD);
     if (!no_cost)
     {
         ModifyMoney(-(int32)cost);
@@ -7372,6 +7389,12 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
 
 void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply, bool only_level_scale /*= false*/)
 {
+	// VIP穿戴属性加成
+	float VIP_OFFSET = VIP::GetVIPOFFSET();
+	uint32 acctId = GetSession()->GetAccountId();
+	uint8 Pvip = VIP::GetVIP(acctId);
+	float MOD = (Pvip * VIP_OFFSET);
+
     if (slot >= INVENTORY_SLOT_BAG_END || !proto)
         return;
 
@@ -7420,24 +7443,34 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
                 break;
             case ITEM_MOD_AGILITY:                          // modify agility
-                HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
-                ApplyStatBuffMod(STAT_AGILITY, float(val), apply);
+                //HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
+                //ApplyStatBuffMod(STAT_AGILITY, float(val), apply);
+				HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val * (1 + MOD)), apply);
+				ApplyStatBuffMod(STAT_AGILITY, float(val * (1 + MOD)), apply);
                 break;
             case ITEM_MOD_STRENGTH:                         //modify strength
-                HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
-                ApplyStatBuffMod(STAT_STRENGTH, float(val), apply);
+                //HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
+                //ApplyStatBuffMod(STAT_STRENGTH, float(val), apply);
+				HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val * (1 + MOD)), apply);
+				ApplyStatBuffMod(STAT_STRENGTH, float(val* (1 + MOD)), apply);
                 break;
             case ITEM_MOD_INTELLECT:                        //modify intellect
-                HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
-                ApplyStatBuffMod(STAT_INTELLECT, float(val), apply);
+                //HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
+                //ApplyStatBuffMod(STAT_INTELLECT, float(val), apply);
+				HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val * (1 + MOD)), apply);
+				ApplyStatBuffMod(STAT_INTELLECT, float(val * (1 + MOD)), apply);
                 break;
             case ITEM_MOD_SPIRIT:                           //modify spirit
-                HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
-                ApplyStatBuffMod(STAT_SPIRIT, float(val), apply);
+                //HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
+                //ApplyStatBuffMod(STAT_SPIRIT, float(val), apply);
+				HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val * (1 + MOD)), apply);
+				ApplyStatBuffMod(STAT_SPIRIT, float(val * (1 + MOD)), apply);
                 break;
             case ITEM_MOD_STAMINA:                          //modify stamina
-                HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
-                ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
+                //HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
+                //ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
+				HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val * (1 + MOD)), apply);
+				ApplyStatBuffMod(STAT_STAMINA, float(val * (1 + MOD)), apply);
                 break;
             case ITEM_MOD_DEFENSE_SKILL_RATING:
                 ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
@@ -11129,6 +11162,18 @@ InventoryResult Player::CanEquipNewItem(uint8 slot, uint16 &dest, uint32 item, b
 
 InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool swap, bool not_loading) const
 {
+	// 穿戴需要VIP等级
+	uint32 acctId = GetSession()->GetAccountId();
+	uint8 Pvip = VIP::GetVIP(acctId);
+	uint8 Ivip = VIP::GetItemVIP(pItem->GetEntry());
+
+	if (Pvip < Ivip)
+	{
+		ChatHandler(GetSession()).PSendSysMessage("|cffFF0000您的VIP等级必须不小于 %u 级才可以装备这件装备|r", Ivip);
+		GetSession()->SendAreaTriggerMessage("|cffFF0000您的VIP等级必须不小于 %u 级才可以装备这件装备|r", Ivip);
+		return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+	}
+
     dest = 0;
     if (pItem)
     {

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -45,7 +45,7 @@
 #include "Util.h"
 #include "Vehicle.h"
 #include "World.h"
-
+#pragma execution_character_set("UTF-8")
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
 ScriptMapMap sWaypointScripts;
@@ -2373,7 +2373,7 @@ void ObjectMgr::LoadItemTemplates()
         for (uint8 i = 0; i < itemTemplate.StatsCount; ++i)
         {
             itemTemplate.ItemStat[i].ItemStatType  = uint32(fields[28 + i*2].GetUInt8());
-            itemTemplate.ItemStat[i].ItemStatValue = int32(fields[29 + i*2].GetInt16());
+            itemTemplate.ItemStat[i].ItemStatValue = int32(fields[29 + i*2].GetInt32()); // 装备属性上限
         }
 
         itemTemplate.ScalingStatDistribution = uint32(fields[48].GetUInt16());
@@ -2386,7 +2386,7 @@ void ObjectMgr::LoadItemTemplates()
             itemTemplate.Damage[i].DamageType = uint32(fields[52 + i*3].GetUInt8());
         }
 
-        itemTemplate.Armor          = uint32(fields[56].GetUInt16());
+        itemTemplate.Armor          = uint32(fields[56].GetUInt32()); // 装备护甲属性限制
         itemTemplate.HolyRes        = uint32(fields[57].GetUInt8());
         itemTemplate.FireRes        = uint32(fields[58].GetUInt8());
         itemTemplate.NatureRes      = uint32(fields[59].GetUInt8());
