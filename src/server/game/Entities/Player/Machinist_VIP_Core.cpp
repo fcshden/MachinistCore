@@ -1,9 +1,4 @@
-﻿/*
-	机械师VIP系统
-	完成： 100%
-*/﻿
-
-#include "AccountMgr.h"
+﻿#include "AccountMgr.h"
 #include "chat.h"
 #include "Config.h"
 #include "Group.h"

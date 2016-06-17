@@ -1,10 +1,3 @@
-/*
-
-	机械师VIP系统
-	完成：100%
-
-*/
-
 #ifndef MACHINIST_VIP_CORE_H
 #define MACHINIST_VIP_CORE_H
 

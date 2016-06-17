@@ -32,7 +32,7 @@ enum TransmogTrinityStrings // Language.h might have same entries, appears when 
 #endif
 };
 
-class TC_GAME_API Transmogrification
+class  Transmogrification
 {
 private:
 	Transmogrification() { };

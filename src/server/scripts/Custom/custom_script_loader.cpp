@@ -18,10 +18,12 @@
 // This is where scripts' loading functions should be declared:
 void AddSC_Transmogrification();
 void AddSC_Machinist_VIP_Core();
+void AddSC_CS_ResetRandomItem();
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
 	AddSC_Transmogrification();
-	AddSC_Machinist_VIP_Core()
+	AddSC_Machinist_VIP_Core();
+	AddSC_CS_ResetRandomItem();
 }
