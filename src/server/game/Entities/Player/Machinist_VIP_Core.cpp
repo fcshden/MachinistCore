@@ -36,6 +36,7 @@ uint32 VIP_JF_COUNT;
 uint32 VIP_CANUSETELEPORTLEVEL;
 int VIP_TELEPORT_COST;
 float VIP_OFFSET;
+float VIP_MONEY_BONUS;
 
 std::unordered_map<uint32, VipElements> Vip;
 std::unordered_map<uint32, ItemVIP> ItemVip;
@@ -140,10 +141,10 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 
 			VIP_MAX = sConfigMgr->GetIntDefault("VIP.MAX", 10);
 			VIP_OFFSET = sConfigMgr->GetFloatDefault("VIP.OFFSET", 0.02f);
-			VIP_STONE_ID = sConfigMgr->GetIntDefault("VIP.STONE", 60008);
 			VIP_TP_BONUS = sConfigMgr->GetIntDefault("VIP.TP_BONUS", 2);
 			VIP_CANUSETELEPORTLEVEL = sConfigMgr->GetIntDefault("VIP.CAN_USE_TELE", 5);
 			VIP_TELEPORT_COST = sConfigMgr->GetIntDefault("VIP.TELE_COST", 2500);
+			VIP_MONEY_BONUS = sConfigMgr->GetFloatDefault("VIP.LOOTMONEY_BONUS", 0.02f);
 
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|    VIP MAX_VIP : %u", VIP_MAX);
@@ -151,6 +152,8 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 			TC_LOG_INFO("server.loading", "|    VIP OFFSET : %f", VIP_OFFSET);
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|     VIP TP BONUS:%u", VIP_TP_BONUS);
+			TC_LOG_INFO("server.loading", "___________________________________");
+			TC_LOG_INFO("server.loading", "|     VIP MONEY BONUS:%u", VIP_MONEY_BONUS);
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|     VIP USE TELE:%u", VIP_CANUSETELEPORTLEVEL);
 			TC_LOG_INFO("server.loading", "___________________________________");
@@ -167,7 +170,7 @@ uint32 VIP::GetVIPMAX()
 	return VIP_MAX;
 };
 
-// VIP收益倍率
+// VIP装备收益倍率
 float VIP::GetVIPOFFSET()
 {
 	return VIP_OFFSET;
@@ -178,6 +181,12 @@ uint32 VIP::GetTALENTBONUS()
 {
 	return VIP_TP_BONUS;
 };
+
+// VIP金币加成
+float VIP::GetVIPLootMoneyBonus()
+{
+	return VIP_MONEY_BONUS;
+}
 
 // 设置瞬飞
 void VIP::SetHearthStone(uint32 guid, uint32 map_id, float x, float y, float z, float o)
@@ -252,6 +261,14 @@ class Machinist_VIP_Account_Engine : public AccountScript
 {
 public: Machinist_VIP_Account_Engine() : AccountScript("Machinist_VIP_Account_Engine"){ };
 
+		void OnAccountLogout(uint32 accountId) override
+		{
+			TC_LOG_INFO("server.loading", "ACCOUNT::LOGOUT ID:%u VIP:%u", accountId, Vip[accountId].vip);
+
+			Vip.erase(accountId);
+
+		}
+
 		void OnAccountLogin(uint32 accountId) override
 		{
 			if (accountId > 0)
@@ -307,6 +324,7 @@ public: Machinist_VIP_Player_Engine() : PlayerScript("Machinist_VIP_Player_Engin
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*欢迎您! 亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Vip[acct_id].vip, green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受装备属性加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_OFFSET * 100)*Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受天赋加成为: %s%u%s 点", green.c_str(), white.c_str(), uint32(Tp_Bonus)*Pvip, green.c_str());
+			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受金钱掉率加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_MONEY_BONUS * 100)*Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受强化成功概率提升: %s%u%s ", green.c_str(), white.c_str(), Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您的帐号积分余额为: %s%u%s 点", green.c_str(), white.c_str(), jf, green.c_str());
 			ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());

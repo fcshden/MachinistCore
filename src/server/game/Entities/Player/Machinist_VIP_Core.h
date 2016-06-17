@@ -42,6 +42,7 @@ public:
 	static uint32 GetVIPMAX();
 	static float GetVIPOFFSET();
 	static uint32 GetTALENTBONUS();
+	static float GetVIPLootMoneyBonus();
 	static uint32 GetVIP(uint32 acct_id);
 	static uint32 GetItemVIP(uint32 item_id);
 	static uint32 GetPlayerJf(uint32 acct_id);

@@ -30,7 +30,7 @@ enum IPLoggingTypes
     ACCOUNT_CHANGE_PW_FAIL       = 3, // Only two types of account changes exist...
     ACCOUNT_CHANGE_EMAIL         = 4,
     ACCOUNT_CHANGE_EMAIL_FAIL    = 5, // ...so we log them individually
-    // OBSOLETE - ACCOUNT_LOGOUT = 6, /* Can not be logged. We still keep the type however */
+    ACCOUNT_LOGOUT = 6, /* Can not be logged. We still keep the type however */
     // CharacterActionIpLogger();
     CHARACTER_CREATE             = 7,
     CHARACTER_LOGIN              = 8,
@@ -89,6 +89,10 @@ class AccountActionIpLogger : public AccountScript
         /* It's impossible to log the account logout process out of character selection - shouldn't matter anyway,
          * as ip doesn't change through playing (obviously).*/
         // ACCOUNT_LOGOUT = 6
+		void OnAccountLogout(uint32 accountId) override
+		{
+			AccountIPLogAction(accountId, ACCOUNT_LOGOUT);
+		}
         void AccountIPLogAction(uint32 accountId, IPLoggingTypes aType)
         {
             // Action IP Logger is only intialized if config is set up
@@ -121,9 +125,9 @@ class AccountActionIpLogger : public AccountScript
             case ACCOUNT_CHANGE_EMAIL_FAIL:
                 systemNote = "Logged on Failed Account Email Change";
                 break;
-            /*case ACCOUNT_LOGOUT:
+            case ACCOUNT_LOGOUT:
                 systemNote = "Logged on AccountLogout"; //Can not be logged
-                break;*/
+                break;
                 // Neither should happen. Ever. Period. If it does, call Ghostbusters and all your local software defences to investigate.
             case UNKNOWN_ACTION:
             default:

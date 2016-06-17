@@ -755,6 +755,8 @@ class TC_GAME_API AccountScript : public ScriptObject
         // Called when an account logged in succesfully
         virtual void OnAccountLogin(uint32 /*accountId*/) {}
 
+		virtual void OnAccountLogout(uint32 /*accountId*/){}
+
         // Called when an account login failed
         virtual void OnFailedAccountLogin(uint32 /*accountId*/) {}
 
@@ -1075,6 +1077,7 @@ class TC_GAME_API ScriptMgr
     public: /* AccountScript */
 
         void OnAccountLogin(uint32 accountId);
+		void OnAccountLogout(uint32 accountId);
         void OnFailedAccountLogin(uint32 accountId);
         void OnEmailChange(uint32 accountId);
         void OnFailedEmailChange(uint32 accountId);

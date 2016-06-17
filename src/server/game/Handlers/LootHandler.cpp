@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#pragma execution_character_set("UTF-8")
+#include "Machinist_VIP_Core.h"
 #include "Common.h"
 #include "Log.h"
 #include "Corpse.h"
@@ -101,9 +102,13 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 {
+
+
+
     TC_LOG_DEBUG("network", "WORLD: CMSG_LOOT_MONEY");
 
     Player* player = GetPlayer();
+
     ObjectGuid guid = player->GetLootGUID();
     if (!guid)
         return;
@@ -185,22 +190,45 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                (*i)->ModifyMoney(goldPerPlayer);
-                (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
+				float VIP_MONEY_BONUS = VIP::GetVIPLootMoneyBonus();
+				uint32 acctId = (*i)->GetSession()->GetAccountId();
+				uint32 Pvip = VIP::GetVIP(acctId);
+				float MOD = Pvip * VIP_MONEY_BONUS;
+				if (Pvip > 0)
+				{
+					 (*i)->ModifyMoney(goldPerPlayer * (1 + MOD));
+					 (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer * (1 + MOD));
 
-                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-                data << uint32(goldPerPlayer);
-                data << uint8(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
-                (*i)->GetSession()->SendPacket(&data);
+					 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+					 data << uint32(goldPerPlayer * (1 + MOD));
+					 data << uint8(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
+					 (*i)->GetSession()->SendPacket(&data);
+
+				}
+				else
+				{
+					(*i)->ModifyMoney(goldPerPlayer);
+					(*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
+
+					WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+					data << uint32(goldPerPlayer);
+					data << uint8(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
+					(*i)->GetSession()->SendPacket(&data);
+				}
             }
         }
         else
         {
-            player->ModifyMoney(loot->gold);
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
+			float VIP_MONEY_BONUS = VIP::GetVIPLootMoneyBonus();
+			uint32 acctId = player->GetSession()->GetAccountId();
+			uint32 Pvip = VIP::GetVIP(acctId);
+			float MOD = Pvip * VIP_MONEY_BONUS;
+
+            player->ModifyMoney(loot->gold * (1 + MOD));
+			player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold * (1 + MOD));
 
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-            data << uint32(loot->gold);
+			data << uint32(loot->gold  * (1 + MOD));
             data << uint8(1);   // "You loot..."
             SendPacket(&data);
         }
@@ -233,7 +261,7 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 
-    // interrupt cast
+    // interrupt cast // 打断施法
     if (GetPlayer()->IsNonMeleeSpellCast(false))
         GetPlayer()->InterruptNonMeleeSpells(false);
 }
