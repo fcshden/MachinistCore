@@ -5953,7 +5953,7 @@ void ObjectMgr::GetTaxiPath(uint32 source, uint32 destination, uint32 &path, uin
         return;
     }
 
-    cost = dest_i->second.price;
+	cost = 1;//dest_i->second.price;
     path = dest_i->second.ID;
 }
 

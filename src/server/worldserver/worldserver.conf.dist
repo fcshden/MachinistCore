@@ -4024,6 +4024,15 @@ VIP.TP_BONUS = 2
 VIP.CAN_USE_TELE = 5
 
 #
+#   VIP.TELE_COST
+#     描述： VIP瞬飞功能消耗的铜币
+#	   默认： 2500
+#
+
+VIP.TELE_COST = 2500
+
+#
+#
 #
 #   VIP.LOOTMONEY_BONUS
 #     描述： 每等级VIP打怪金币收益加成

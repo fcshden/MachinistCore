@@ -137,6 +137,7 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 			VIP_MAX = sConfigMgr->GetIntDefault("VIP.MAX", 10);
 			VIP_OFFSET = sConfigMgr->GetFloatDefault("VIP.OFFSET", 0.02f);
 			VIP_TP_BONUS = sConfigMgr->GetIntDefault("VIP.TP_BONUS", 2);
+			VIP_UPGRADEITEM_ID = sConfigMgr->GetIntDefault("VIP.UPGRADEITEM", 60007);
 			VIP_CANUSETELEPORTLEVEL = sConfigMgr->GetIntDefault("VIP.CAN_USE_TELE", 5);
 			VIP_TELEPORT_COST = sConfigMgr->GetIntDefault("VIP.TELE_COST", 2500);
 			VIP_MONEY_BONUS = sConfigMgr->GetFloatDefault("VIP.LOOTMONEY_BONUS", 0.02f);
@@ -148,7 +149,7 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|     VIP TP BONUS:%u", VIP_TP_BONUS);
 			TC_LOG_INFO("server.loading", "___________________________________");
-			TC_LOG_INFO("server.loading", "|     VIP MONEY BONUS:%u", VIP_MONEY_BONUS);
+			TC_LOG_INFO("server.loading", "|     VIP MONEY BONUS:%f", VIP_MONEY_BONUS);
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|     VIP USE TELE:%u", VIP_CANUSETELEPORTLEVEL);
 			TC_LOG_INFO("server.loading", "___________________________________");
@@ -182,6 +183,12 @@ float VIP::GetVIPLootMoneyBonus()
 {
 	return VIP_MONEY_BONUS;
 }
+
+// 获取物品vip等级
+uint32 VIP::GetItemVIP(uint32 item_id)
+{
+	return ItemVip[item_id].vip;
+};
 
 // 设置瞬飞
 void VIP::SetHearthStone(uint32 guid, uint32 map_id, float x, float y, float z, float o)
@@ -229,26 +236,6 @@ void VIP::SetPlayerJf(uint32 acct_id, uint32 jf)
 	stmt->setUInt32(1, acct_id);
 	LoginDatabase.Execute(stmt);
 
-};
-
-
-
-uint32 VIP::GetItemVIP(uint32 item_id)
-{
-	return ItemVip[item_id].vip;
-};
-
-void VIP::SetItemVIP(uint32 item_id, uint32 item_vip)
-{
-	if (item_vip < 1) { item_vip = 1; };
-	if (item_vip > VIP_MAX) { item_vip = VIP_MAX; };
-
-	PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SET_ITEM_VIP);
-	stmt->setUInt8(0, item_vip);
-	stmt->setUInt32(1, item_id);
-	WorldDatabase.Execute(stmt);
-
-	ItemVip[item_id].vip = item_vip;
 };
 
 
@@ -428,6 +415,8 @@ void RemoveItem(uint32 itemEntry, Player* player, uint32 amount)
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Vip[acct_id].vip, green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受装备属性加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_OFFSET * 100)*Pvip, "%");
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受天赋加成为: %s%u%s 点", green.c_str(), white.c_str(), uint32(Tp_Bonus)*Pvip, green.c_str());
+	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受金钱掉率加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_MONEY_BONUS * 100)*Pvip, "%");
+	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受强化成功概率提升: %s%u%s ", green.c_str(), white.c_str(), Pvip, "%");
 	ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());
 
 };

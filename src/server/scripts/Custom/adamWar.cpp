@@ -18,7 +18,7 @@ public:
 			ItemTemplate const* proto = item->GetTemplate();
 
 			std::string itemDes = proto->Description;
-			std::string str = "【神器】战魂护符， 放在系统背包第一格可以提升人物属性";
+			std::string str = "【神器】战魂护符，放在系统背包第一格可以提升人物属性";
 
 			if (itemDes == str)
 			{
