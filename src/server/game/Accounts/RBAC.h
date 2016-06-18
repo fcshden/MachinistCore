@@ -703,6 +703,8 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_SERVER_RESTART_FORCE                   = 840,
 
     // custom permissions 1000+
+	RBAC_PERM_COMMAND_CUSTOM_CHAT = 1009,
+
     RBAC_PERM_MAX
 };
 

@@ -154,7 +154,7 @@ void ResetRandomItem::resetItemAction(Player* player, ObjectGuid itemGUID)const
 	std::string resetRandomLink = sResetRandomItem->GetItemLink(randomItemEntry, session);
 	std::string message_1 = "重置物品随机附魔消耗" + resetRandomLink + " x " + count + " 枚！";
 	std::string message = "|CFFFF0000您的" + resetRandomLink + "|CFFFF0000数量不足 " + count + "|CFFFF0000 枚！";
-
+	
 	Item* changedItem = NULL;
 
 	if (!itemGUID.IsEmpty())

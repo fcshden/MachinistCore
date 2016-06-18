@@ -19,6 +19,12 @@
 void AddSC_Transmogrification();
 void AddSC_Machinist_VIP_Core();
 void AddSC_CS_ResetRandomItem();
+void AddSC_itemUpgrade();
+void AddSC_transportStone();
+void AddSC_player_Log();
+void AddSC_killstreak_system();
+void AddSC_unBindItem();
+void AddSC_cs_world_chat();
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
@@ -26,4 +32,10 @@ void AddCustomScripts()
 	AddSC_Transmogrification();
 	AddSC_Machinist_VIP_Core();
 	AddSC_CS_ResetRandomItem();
+	AddSC_itemUpgrade();
+	AddSC_transportStone();
+	AddSC_player_Log();
+	AddSC_killstreak_system();
+	AddSC_unBindItem();
+	AddSC_cs_world_chat();
 }
