@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#pragma execution_character_set("UTF-8")
 #include "Creature.h"
 #include "BattlegroundMgr.h"
 #include "CellImpl.h"
@@ -50,6 +50,44 @@
 #include "LuaEngine.h"
 #endif
 #include "Transport.h"
+
+
+//自定义单个地图生物血量和伤害
+struct InstanceModifierTemplate
+{
+	uint32 id;
+	uint32 map;
+	uint8 minLevelModifier;
+	uint8 maxLevelModifier;
+	float HealthModifier;
+	uint32 ManaModifier;
+	float DamageModifier;
+};
+std::vector<InstanceModifierTemplate> InstanceModifierInfo;
+void LoadInstanceModifier()
+{
+	InstanceModifierInfo.clear();
+	QueryResult result = WorldDatabase.PQuery("SELECT id, map, minLevelModifier, maxLevelModifier, HealthModifier, ManaModifier, DamageModifier FROM creature_instance_modifier");
+	if (!result)
+	{
+		return;
+	}
+	do
+	{
+		Field* fields = result->Fetch();
+		InstanceModifierTemplate InstanceModifierTemp;
+		InstanceModifierTemp.id = fields[0].GetUInt32();
+		InstanceModifierTemp.map = fields[1].GetUInt32();
+		InstanceModifierTemp.minLevelModifier = fields[2].GetUInt8();
+		InstanceModifierTemp.maxLevelModifier = fields[3].GetUInt8();
+		InstanceModifierTemp.HealthModifier = fields[4].GetFloat();
+		InstanceModifierTemp.ManaModifier = fields[5].GetUInt32();
+		InstanceModifierTemp.DamageModifier = fields[6].GetFloat();
+		InstanceModifierInfo.push_back(InstanceModifierTemp);
+	} while (result->NextRow());
+}
+
+
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
@@ -1164,6 +1202,8 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 
 void Creature::SelectLevel()
 {
+	LoadInstanceModifier();
+
     CreatureTemplate const* cInfo = GetCreatureTemplate();
 
     uint32 rank = IsPet() ? 0 : cInfo->rank;
@@ -1171,6 +1211,16 @@ void Creature::SelectLevel()
     // level
     uint8 minlevel = std::min(cInfo->maxlevel, cInfo->minlevel);
     uint8 maxlevel = std::max(cInfo->maxlevel, cInfo->minlevel);
+
+	for (uint8 i = 0; i < InstanceModifierInfo.size(); ++i) // 自定义怪物
+	{
+		if (InstanceModifierInfo[i].map == GetMapId())
+		{
+			minlevel = InstanceModifierInfo[i].minLevelModifier;//修改最小等级
+			maxlevel = InstanceModifierInfo[i].maxLevelModifier;//修改最大等级
+		}
+	} // 自定义怪物
+
     uint8 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
@@ -1178,6 +1228,12 @@ void Creature::SelectLevel()
 
     // health
     float healthmod = _GetHealthMod(rank);
+
+	for (uint8 i = 0; i < InstanceModifierInfo.size(); ++i) // 自定义怪物 
+	{
+		if (InstanceModifierInfo[i].map == GetMapId())
+			healthmod = healthmod * InstanceModifierInfo[i].HealthModifier;//修改气血
+	} // 自定义怪物
 
     uint32 basehp = stats->GenerateHealth(cInfo);
     uint32 health = uint32(basehp * healthmod);
@@ -1189,6 +1245,11 @@ void Creature::SelectLevel()
 
     // mana
     uint32 mana = stats->GenerateMana(cInfo);
+	for (uint8 i = 0; i < InstanceModifierInfo.size(); ++i) // 自定义怪物 
+	{
+		if (InstanceModifierInfo[i].map == GetMapId())
+			mana = mana * InstanceModifierInfo[i].ManaModifier;//修改魔法
+	} // 自定义怪物
 
     SetCreateMana(mana);
     SetMaxPower(POWER_MANA, mana); // MAX Mana
@@ -1202,6 +1263,12 @@ void Creature::SelectLevel()
     // damage
 
     float basedamage = stats->GenerateBaseDamage(cInfo);
+
+	for (uint8 i = 0; i < InstanceModifierInfo.size(); ++i) // 自定义怪物 
+	{
+		if (InstanceModifierInfo[i].map == GetMapId())
+			basedamage = basedamage * InstanceModifierInfo[i].DamageModifier;//修改伤害
+	} // 自定义怪物
 
     float weaponBaseMinDamage = basedamage;
     float weaponBaseMaxDamage = basedamage * 1.5f;
@@ -1265,21 +1332,44 @@ float Creature::_GetDamageMod(int32 Rank)
 
 float Creature::GetSpellDamageMod(int32 Rank) const
 {
-    switch (Rank)                                           // define rates for each elite rank
-    {
-        case CREATURE_ELITE_NORMAL:
-            return sWorld->getRate(RATE_CREATURE_NORMAL_SPELLDAMAGE);
-        case CREATURE_ELITE_ELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
-        case CREATURE_ELITE_RAREELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
-        case CREATURE_ELITE_WORLDBOSS:
-            return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
-        case CREATURE_ELITE_RARE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
-        default:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
-    }
+    //switch (Rank)                                           // define rates for each elite rank
+    //{
+    //    case CREATURE_ELITE_NORMAL:
+    //        return sWorld->getRate(RATE_CREATURE_NORMAL_SPELLDAMAGE);
+    //    case CREATURE_ELITE_ELITE:
+    //        return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+    //    case CREATURE_ELITE_RAREELITE:
+    //        return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
+    //    case CREATURE_ELITE_WORLDBOSS:
+    //        return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
+    //    case CREATURE_ELITE_RARE:
+    //        return sWorld->getRate(RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
+    //    default:
+    //        return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+    //}
+	LoadInstanceModifier();
+	float SpellDamageBase = 1.0f;
+
+	for (uint32 i = 0; i < InstanceModifierInfo.size(); ++i)
+	{
+		if (InstanceModifierInfo[i].map == GetMapId())
+			SpellDamageBase = SpellDamageBase * InstanceModifierInfo[i].DamageModifier;//定义魔法伤害倍数
+	}
+	switch (Rank)                                           // define rates for each elite rank
+	{
+	case CREATURE_ELITE_NORMAL:
+		return sWorld->getRate(RATE_CREATURE_NORMAL_SPELLDAMAGE) * SpellDamageBase;
+	case CREATURE_ELITE_ELITE:
+		return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE) * SpellDamageBase;
+	case CREATURE_ELITE_RAREELITE:
+		return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE) * SpellDamageBase;
+	case CREATURE_ELITE_WORLDBOSS:
+		return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE) * SpellDamageBase;
+	case CREATURE_ELITE_RARE:
+		return sWorld->getRate(RATE_CREATURE_ELITE_RARE_SPELLDAMAGE) * SpellDamageBase;
+	default:
+		return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE) * SpellDamageBase;
+	}
 }
 
 bool Creature::CreateFromProto(ObjectGuid::LowType guidlow, uint32 entry, CreatureData const* data /*= nullptr*/, uint32 vehId /*= 0*/)

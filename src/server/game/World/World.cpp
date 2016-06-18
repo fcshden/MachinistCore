@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -19,6 +19,7 @@
 /** \file
     \ingroup world
 */
+#pragma execution_character_set("UTF-8")
 #include "AnticheatMgr.h"
 #include "World.h"
 #include "AchievementMgr.h"
@@ -244,6 +245,13 @@ void World::AddSession_(WorldSession* s)
         delete s;                                           // session not added yet in session list, so not listed in queue
         return;
     }
+	/*  添加客户端限制 */
+	//uint32 worldSession = GetActiveSessionCount();
+	//if (worldSession >= 5)
+	//{
+	//	s->SetInQueue(true);
+	//	return;
+	//}
 
     // decrease session counts only at not reconnection case
     bool decrease_session = true;

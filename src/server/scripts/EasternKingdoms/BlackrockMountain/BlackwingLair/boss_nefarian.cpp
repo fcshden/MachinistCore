@@ -514,11 +514,11 @@ public:
                                 break;
                             case CLASS_WARRIOR:
                                 Talk(SAY_WARRIOR);
-                                DoCast(me, SPELL_WARRIOR);
+                                //DoCast(me, SPELL_WARRIOR);
                                 break;
                             case CLASS_DRUID:
                                 Talk(SAY_DRUID);
-                                DoCast(target, SPELL_DRUID);
+                                //DoCast(target, SPELL_DRUID);
                                 break;
                             case CLASS_PRIEST:
                                 Talk(SAY_PRIEST);
@@ -526,11 +526,11 @@ public:
                                 break;
                             case CLASS_PALADIN:
                                 Talk(SAY_PALADIN);
-                                DoCast(me, SPELL_PALADIN);
+                                //DoCast(me, SPELL_PALADIN);
                                 break;
                             case CLASS_SHAMAN:
                                 Talk(SAY_SHAMAN);
-                                DoCast(me, SPELL_SHAMAN);
+                                //DoCast(me, SPELL_SHAMAN);
                                 break;
                             case CLASS_WARLOCK:
                                 Talk(SAY_WARLOCK);
@@ -546,7 +546,7 @@ public:
                                 break;
                             case CLASS_DEATH_KNIGHT:
                                 Talk(SAY_DEATH_KNIGHT);
-                                DoCast(me, SPELL_DEATH_KNIGHT);
+                                //DoCast(me, SPELL_DEATH_KNIGHT);
                                 break;
                             default:
                                 break;
