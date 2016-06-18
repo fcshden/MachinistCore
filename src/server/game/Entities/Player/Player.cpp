@@ -6868,10 +6868,20 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     data << uint64(victim_guid);
     data << uint32(victim_rank);
 
-    GetSession()->SendPacket(&data);
+    //GetSession()->SendPacket(&data);
 
     // add honor points
-    ModifyHonorPoints(honor);
+    //ModifyHonorPoints(honor);
+	if (InBattleground())
+	{
+		GetSession()->SendPacket(&data);
+		ModifyHonorPoints(honor);
+	}
+	else
+	{
+		GetSession()->SendPacket(&data);
+		ModifyHonorPoints(honor * 0.10f); // 野外pk1/10战场荣誉
+	}
 
     ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, honor, true);
 
@@ -7386,6 +7396,309 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
     ApplyEnchantment(item, apply);
 
     TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: completed");
+}
+
+void Player::applyAdamWarBonuses(ItemTemplate const* proto, uint8 slot, bool apply, bool only_level_scale /*= false*/)
+{
+	if (slot != ADAMWAR_SLOT || !proto)
+		return;
+
+	ScalingStatDistributionEntry const* ssd = proto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(proto->ScalingStatDistribution) : NULL;
+	if (only_level_scale && !ssd)
+		return;
+
+	// req. check at equip, but allow use for extended range if range limit max level, set proper level
+	uint32 ssd_level = getLevel();
+	if (ssd && ssd_level > ssd->MaxLevel)
+		ssd_level = ssd->MaxLevel;
+
+	ScalingStatValuesEntry const* ssv = proto->ScalingStatValue ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
+	if (only_level_scale && !ssv)
+		return;
+
+	for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+	{
+		uint32 statType = 0;
+		int32  val = 0;
+		// If set ScalingStatDistribution need get stats and values from it
+		if (ssd && ssv)
+		{
+			if (ssd->StatMod[i] < 0)
+				continue;
+			statType = ssd->StatMod[i];
+			val = (ssv->getssdMultiplier(proto->ScalingStatValue) * ssd->Modifier[i]) / 10000;
+		}
+		else
+		{
+			if (i >= proto->StatsCount)
+				continue;
+			statType = proto->ItemStat[i].ItemStatType;
+			val = proto->ItemStat[i].ItemStatValue;
+		}
+
+		if (val == 0)
+			continue;
+
+		switch (statType)
+		{
+		case ITEM_MOD_MANA:
+			HandleStatModifier(UNIT_MOD_MANA, BASE_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_HEALTH:                           // modify HP
+			HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_AGILITY:                          // modify agility
+			HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
+			ApplyStatBuffMod(STAT_AGILITY, float(val), apply);
+			break;
+		case ITEM_MOD_STRENGTH:                         //modify strength
+			HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
+			ApplyStatBuffMod(STAT_STRENGTH, float(val), apply);
+			break;
+		case ITEM_MOD_INTELLECT:                        //modify intellect
+			HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
+			ApplyStatBuffMod(STAT_INTELLECT, float(val), apply);
+			break;
+		case ITEM_MOD_SPIRIT:                           //modify spirit
+			HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
+			ApplyStatBuffMod(STAT_SPIRIT, float(val), apply);
+			break;
+		case ITEM_MOD_STAMINA:                          //modify stamina
+			HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
+			ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
+			break;
+		case ITEM_MOD_DEFENSE_SKILL_RATING:
+			ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
+			break;
+		case ITEM_MOD_DODGE_RATING:
+			ApplyRatingMod(CR_DODGE, int32(val), apply);
+			break;
+		case ITEM_MOD_PARRY_RATING:
+			ApplyRatingMod(CR_PARRY, int32(val), apply);
+			break;
+		case ITEM_MOD_BLOCK_RATING:
+			ApplyRatingMod(CR_BLOCK, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_MELEE_RATING:
+			ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_RANGED_RATING:
+			ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_SPELL_RATING:
+			ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_MELEE_RATING:
+			ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_RANGED_RATING:
+			ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_SPELL_RATING:
+			ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
+			ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
+			ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
+			ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
+			ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
+			ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
+			ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_MELEE_RATING:
+			ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_RANGED_RATING:
+			ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_SPELL_RATING:
+			ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_RATING:
+			ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_RATING:
+			ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_RATING:
+			ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_RATING:
+			ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_RESILIENCE_RATING:
+			ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_RATING:
+			ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
+			ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
+			ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_EXPERTISE_RATING:
+			ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
+			break;
+		case ITEM_MOD_ATTACK_POWER:
+			HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(val), apply);
+			HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_RANGED_ATTACK_POWER:
+			HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
+			break;
+			//            case ITEM_MOD_FERAL_ATTACK_POWER:
+			//                ApplyFeralAPBonus(int32(val), apply);
+			//                break;
+		case ITEM_MOD_MANA_REGENERATION:
+			ApplyManaRegenBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_ARMOR_PENETRATION_RATING:
+			ApplyRatingMod(CR_ARMOR_PENETRATION, int32(val), apply);
+			break;
+		case ITEM_MOD_SPELL_POWER:
+			ApplySpellPowerBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_HEALTH_REGEN:
+			ApplyHealthRegenBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_SPELL_PENETRATION:
+			ApplySpellPenetrationBonus(val, apply);
+			break;
+		case ITEM_MOD_BLOCK_VALUE:
+			HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
+			break;
+			// deprecated item mods
+		case ITEM_MOD_SPELL_HEALING_DONE:
+		case ITEM_MOD_SPELL_DAMAGE_DONE:
+			break;
+		}
+	}
+
+	// Apply Spell Power from ScalingStatValue if set
+	if (ssv)
+		if (int32 spellbonus = ssv->getSpellBonus(proto->ScalingStatValue))
+			ApplySpellPowerBonus(spellbonus, apply);
+
+	// If set ScalingStatValue armor get it or use item armor
+	uint32 armor = proto->Armor;
+	if (ssv)
+	{
+		if (uint32 ssvarmor = ssv->getArmorMod(proto->ScalingStatValue))
+			armor = ssvarmor;
+	}
+	else if (armor && proto->ArmorDamageModifier)
+		armor -= uint32(proto->ArmorDamageModifier);
+
+	if (armor)
+	{
+		UnitModifierType modType = TOTAL_VALUE;
+		if (proto->Class == ITEM_CLASS_ARMOR)
+		{
+			switch (proto->SubClass)
+			{
+			case ITEM_SUBCLASS_ARMOR_CLOTH:
+			case ITEM_SUBCLASS_ARMOR_LEATHER:
+			case ITEM_SUBCLASS_ARMOR_MAIL:
+			case ITEM_SUBCLASS_ARMOR_PLATE:
+			case ITEM_SUBCLASS_ARMOR_SHIELD:
+				modType = BASE_VALUE;
+				break;
+			}
+		}
+		HandleStatModifier(UNIT_MOD_ARMOR, modType, float(armor), apply);
+	}
+
+	// Add armor bonus from ArmorDamageModifier if > 0
+	if (proto->ArmorDamageModifier > 0)
+		HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier), apply);
+
+	if (proto->Block)
+		HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block), apply);
+
+	if (proto->HolyRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->HolyRes), apply);
+
+	if (proto->FireRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(proto->FireRes), apply);
+
+	if (proto->NatureRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(proto->NatureRes), apply);
+
+	if (proto->FrostRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(proto->FrostRes), apply);
+
+	if (proto->ShadowRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(proto->ShadowRes), apply);
+
+	if (proto->ArcaneRes)
+		HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
+
+	WeaponAttackType attType = BASE_ATTACK;
+
+	if (slot == EQUIPMENT_SLOT_RANGED && (
+		proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
+		proto->InventoryType == INVTYPE_RANGEDRIGHT))
+	{
+		attType = RANGED_ATTACK;
+	}
+	else if (slot == EQUIPMENT_SLOT_OFFHAND)
+	{
+		attType = OFF_ATTACK;
+	}
+
+	if (CanUseAttackType(attType))
+		_ApplyWeaponDamage(slot, proto, ssv, apply);
+
+
+	// Druids get feral AP bonus from weapon dps (also use DPS from ScalingStatValue)
+	if (getClass() == CLASS_DRUID)
+	{
+		int32 dpsMod = 0;
+		int32 feral_bonus = 0;
+		if (ssv)
+		{
+			dpsMod = ssv->getDPSMod(proto->ScalingStatValue);
+			feral_bonus += ssv->getFeralBonus(proto->ScalingStatValue);
+		}
+
+		feral_bonus += proto->getFeralBonus(dpsMod);
+		if (feral_bonus)
+			ApplyFeralAPBonus(feral_bonus, apply);
+	}
+}
+
+void Player::applyAdamWarItemMod(Item* item, uint8 slot, bool apply)
+{
+	if (slot != ADAMWAR_SLOT || !item)
+		return;
+	ItemTemplate const* proto = item->GetTemplate();
+
+	if (!proto)
+		return;
+
+	// not apply/remove mods for broken item
+	if (item->IsBroken())
+		return;
+	ApplyItemEquipSpell(item, apply);
+
 }
 
 void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply, bool only_level_scale /*= false*/)

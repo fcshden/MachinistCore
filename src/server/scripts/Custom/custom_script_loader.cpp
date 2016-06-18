@@ -25,6 +25,9 @@ void AddSC_player_Log();
 void AddSC_killstreak_system();
 void AddSC_unBindItem();
 void AddSC_cs_world_chat();
+void AddSC_LearnAllSpellsOnLevelChanged();
+void AddSC_clearCombat();
+void AddSC_adam_War();
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
@@ -38,4 +41,7 @@ void AddCustomScripts()
 	AddSC_killstreak_system();
 	AddSC_unBindItem();
 	AddSC_cs_world_chat();
+	AddSC_LearnAllSpellsOnLevelChanged();
+	AddSC_clearCombat();
+	AddSC_adam_War();
 }
