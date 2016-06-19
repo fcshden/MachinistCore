@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include "Config.h"
 #include "ArenaScore.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
@@ -665,9 +665,17 @@ void Battleground::RemoveAuraOnTeam(uint32 SpellID, uint32 TeamID)
 
 void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 {
+
+	uint32 RewardItem = sConfigMgr->GetIntDefault("Battlegrounds.RewardItem", 60009);
+	uint32 RewardItemCount = sConfigMgr->GetIntDefault("Battlegrounds.RewardItemCount", 1);
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-        if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardHonorToTeam"))
-            UpdatePlayerScore(player, SCORE_BONUS_HONOR, Honor);
+	{
+		if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardHonorToTeam"))
+		{
+			 UpdatePlayerScore(player, SCORE_BONUS_HONOR, Honor);
+			 player->AddItem(RewardItem, RewardItemCount);
+		}    
+	}   
 }
 
 void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
