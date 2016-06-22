@@ -42,7 +42,7 @@ public:
 		uint32 tarClass = tar->GetTemplate()->Class;
 
 		// 保存entry
-		uint32 targetItemEntry = tar->GetEntry();
+		uint32 targetItemGUID= tar->GetGUID();
 
 		// 读取配置文件
 		uint32 unBindItemEntry = sConfigMgr->GetIntDefault("unBindItemEntry", 60005);
@@ -63,7 +63,7 @@ public:
 		// 判断物品类型
 		if (4 == tarClass || 2 == tarClass)
 		{
-			player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "", targetItemEntry, 0, message_1, 0, false);
+			player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "", targetItemGUID, 0, message_1, 0, false);
 			player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, item->GetGUID());
 		}
 		else
@@ -74,7 +74,7 @@ public:
 		return false;
 	}
 
-	bool OnGossipSelect(Player* player, Item* item, uint32 targetItemEntry, uint32 action) override
+	bool OnGossipSelect(Player* player, Item* item, uint32 targetItemGUID, uint32 action) override
 	{
 
 		// 调试信息
@@ -95,7 +95,8 @@ public:
 		std::string message = "|CFFFF0000您的" + unBindItemLink + "|CFFFF0000数量不足 " + count + "|CFFFF0000 枚！";
 
 		std::string message_1 = "解除绑定消耗" + unBindItemLink + " x " + count + " 枚！";
-		Item* tar = player->GetItemByEntry(targetItemEntry);
+
+		Item* tar = player->GetItemByGuid(ObjectGuid(HighGuid::Item, targetItemGUID));
 
 		if (player->HasItemCount(unBindItemEntry, unBindItemCount))
 		{

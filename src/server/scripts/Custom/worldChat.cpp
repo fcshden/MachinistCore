@@ -141,7 +141,7 @@ public:
 		static std::vector<ChatCommand> WorldChatCommandTable =
 		{
 			{ "chat", rbac::RBAC_PERM_COMMAND_CUSTOM_CHAT, false, &HandleWorldChatCommand, "" },
-		};
+		}; 
 
 		return WorldChatCommandTable;
 	}
@@ -211,7 +211,7 @@ public:
 
 		msg += args;
 
-		uint32 chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
+		int chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
 
 		if (FACTION_SPECIFIC)
 		{
@@ -251,9 +251,11 @@ class Player_WorldChat : public PlayerScript
 public:
 	Player_WorldChat() : PlayerScript("Player_WorldChat") { }
 
+	uint32 chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
+
 	void OnLogin(Player* player, bool /*firstLogin*/) override
 	{
-		ChatHandler(player->GetSession()).PSendSysMessage("|CFFFF0000[系统提示]|r世界聊天频道已经开启, 每次聊天消耗1银币, 聊天命令为：.chat + 聊天内容!");
+		ChatHandler(player->GetSession()).PSendSysMessage("|CFFFF0000[系统提示]|r世界聊天频道已经开启, 每次聊天消耗%u银币, 聊天命令为：.chat + 聊天内容!", uint32(chatCost * 0.01));
 	}
 };
 
