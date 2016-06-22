@@ -7893,7 +7893,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 ApplyRatingMod(CR_ARMOR_PENETRATION, int32(val), apply);
                 break;
             case ITEM_MOD_SPELL_POWER:
-                ApplySpellPowerBonus(int32(val), apply);
+				ApplySpellPowerBonus(int32(val* (1 + MOD)), apply);
                 break;
             case ITEM_MOD_HEALTH_REGEN:
                 ApplyHealthRegenBonus(int32(val), apply);

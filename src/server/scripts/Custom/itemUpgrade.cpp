@@ -173,7 +173,7 @@ public:
 		std::string upedItemLink = sResetRandomItem->GetItemLink(upid, session);
 		if (50 < chance)
 		{
-			chance = chance - 20;
+			chance = chance - 15;
 		}
 		switch (action)
 		{

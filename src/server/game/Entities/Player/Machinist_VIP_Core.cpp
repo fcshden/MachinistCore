@@ -64,7 +64,6 @@ void AnnounceLoggingToWorld(Player* player, uint32 type)
 	std::string msg = "|CFFFF0000[会员频道]|r[" + green + "VIP>>" + ConvertNumberToString(PlayerLogInVip) + "级玩家|r]: ";
 	msg = msg + pName + green + " 踏着七彩祥云，";
 
-	if (type == 0) { msg = msg + "离开游戏服务器|r"; };
 	if (type == 1) { msg = msg + "进入游戏服务器|r"; };
 
 	if (PlayerLogInVip > 0)
@@ -286,11 +285,6 @@ public: Machinist_VIP_Account_Engine() : AccountScript("Machinist_VIP_Account_En
 class Machinist_VIP_Player_Engine : public PlayerScript
 {
 public: Machinist_VIP_Player_Engine() : PlayerScript("Machinist_VIP_Player_Engine"){ };
-
-		void OnLogout(Player* player) override
-		{
-			AnnounceLoggingToWorld(player, 0);
-		};
 
 		void OnLogin(Player* player, bool firstLogin) override
 		{

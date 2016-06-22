@@ -2,13 +2,13 @@
 #include "Player.h"
 #include "WorldSession.h"
 #include "Chat.h"
+#include "Config.h"
 #pragma execution_character_set("UTF-8")
 #define MSG_COLOR_BLUEVIOLET "|cFF8A2BE2"
 const char* CLASS_ICON;
 const char* RACE_ICON;
-
 #define FACTION_SPECIFIC 0
-#define CHAT_COST 100
+
 
 
 std::string GetNameLink(Player* player)
@@ -211,11 +211,13 @@ public:
 
 		msg += args;
 
+		uint32 chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
+
 		if (FACTION_SPECIFIC)
 		{
-			if (player->HasEnoughMoney(CHAT_COST))
+			if (player->HasEnoughMoney(chatCost))
 			{
-				player->ModifyMoney(-CHAT_COST);
+				player->ModifyMoney(-chatCost);
 				SessionMap sessions = sWorld->GetAllSessions();
 				for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
 					if (Player* plr = itr->second->GetPlayer())
@@ -229,9 +231,9 @@ public:
 			}
 		}
 		else
-			if (player->HasEnoughMoney(CHAT_COST))
+			if (player->HasEnoughMoney(chatCost))
 			{
-				player->ModifyMoney(-CHAT_COST);
+				player->ModifyMoney(-chatCost);
 				sWorld->SendServerMessage(SERVER_MSG_STRING, msg.c_str(), 0);
 			}
 			else

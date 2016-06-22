@@ -3915,26 +3915,26 @@ Transmogrification.TokenAmount = 1
 #        Description: Ignore stat count > 0 requirement for source items
 #        Default:    0
 
-Transmogrification.AllowPoor = 0
-Transmogrification.AllowCommon = 0
+Transmogrification.AllowPoor = 1
+Transmogrification.AllowCommon = 1
 Transmogrification.AllowUncommon = 1
 Transmogrification.AllowRare = 1
 Transmogrification.AllowEpic = 1
-Transmogrification.AllowLegendary = 0
-Transmogrification.AllowArtifact = 0
+Transmogrification.AllowLegendary = 1
+Transmogrification.AllowArtifact = 1
 Transmogrification.AllowHeirloom = 1
 
-Transmogrification.AllowMixedArmorTypes = 0
-Transmogrification.AllowMixedWeaponTypes = 0
+Transmogrification.AllowMixedArmorTypes = 1
+Transmogrification.AllowMixedWeaponTypes = 1
 Transmogrification.AllowFishingPoles = 0
 
-Transmogrification.IgnoreReqRace = 0
-Transmogrification.IgnoreReqClass = 0
-Transmogrification.IgnoreReqSkill = 0
-Transmogrification.IgnoreReqSpell = 0
-Transmogrification.IgnoreReqLevel = 0
-Transmogrification.IgnoreReqEvent = 0
-Transmogrification.IgnoreReqStats = 0
+Transmogrification.IgnoreReqRace = 1
+Transmogrification.IgnoreReqClass = 1
+Transmogrification.IgnoreReqSkill = 1
+Transmogrification.IgnoreReqSpell = 1
+Transmogrification.IgnoreReqLevel = 1
+Transmogrification.IgnoreReqEvent = 1
+Transmogrification.IgnoreReqStats = 1
 
 #
 #    SET FEATURE 套装设置
@@ -3995,7 +3995,7 @@ VIP.OFFSET = 0.02
 #
 #	VIP.UPGRADEITEM
 #		说明: 提升VIP等级的凭证的物品ENTRY
-#		默认: 63020
+#		默认: 60007
 
 VIP.UPGRADEITEM =  60007
 
@@ -4183,6 +4183,15 @@ Fake.Who.List = 0
 
 Battlegrounds.RewardItem = 60009
 Battlegrounds.RewardItemCount = 1
+
+#
+###################################################################################################
+#    世界聊天系统
+#        World.Chat.Cost
+#        说明  : 世界聊天系统花费铜币的数量
+#        
+
+World.Chat.Cost = 100
 
 #
 ###################################################################################################

@@ -23,7 +23,7 @@ public:
 	{
 		// 打断施法
 		if (player->IsNonMeleeSpellCast(false))
-			player->InterruptNonMeleeSpells(true);
+			player->InterruptNonMeleeSpells(false);
 
 		// 是否在战斗
 		if (player->IsInCombat())
