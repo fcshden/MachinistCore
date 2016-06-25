@@ -4176,13 +4176,20 @@ Fake.Who.List = 0
 ###################################################################################################
 #    战场奖励系统
 #        Battlegrounds.RewardItem
-#        说明  : 战场奖励物品的entry
+#        说明  : 战场奖励物品的entry(获得荣誉时)
 #        Battlegrounds.RewardItemCount
-#		  说明  : 战场奖励物品数量
+#		  说明  : 战场奖励物品数量(获得荣誉时)
+#        Battlegrounds.End.RewardItem
+#        说明  : 战场奖励物品的entry(战场结束时)
+#        Battlegrounds.End.RewardItemCount
+#		  说明  : 战场奖励物品数量(战场结束时)
 #        
 
 Battlegrounds.RewardItem = 60009
 Battlegrounds.RewardItemCount = 1
+
+Battlegrounds.End.RewardItem = 60016
+Battlegrounds.End.RewardItemCount = 1
 
 #
 ###################################################################################################

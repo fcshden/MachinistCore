@@ -24,6 +24,7 @@
 #include "Player.h"
 #include "Util.h"
 #include "WorldSession.h"
+#include "Config.h"
 
 BattlegroundAB::BattlegroundAB()
 {
@@ -639,11 +640,32 @@ void BattlegroundAB::Reset()
 
 void BattlegroundAB::EndBattleground(uint32 winner)
 {
+	uint32 rewardItem = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItem", 60016);
+	uint32 rewardItemCount = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItemCount", 1);
     // Win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+	if (winner == ALLIANCE)
+	{
+		RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+		for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+		{
+			if (Player* player = _GetPlayerForTeam(ALLIANCE, itr, "RewardHonorToTeam"))
+			{
+				player->AddItem(rewardItem, rewardItemCount);
+			}
+		}
+	}
+
+	if (winner == HORDE)
+	{
+		RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+		for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+		{
+			if (Player* player = _GetPlayerForTeam(HORDE, itr, "RewardHonorToTeam"))
+			{
+				player->AddItem(rewardItem, rewardItemCount);
+			}
+		}
+	}
     // Complete map_end rewards (even if no team wins)
     RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);

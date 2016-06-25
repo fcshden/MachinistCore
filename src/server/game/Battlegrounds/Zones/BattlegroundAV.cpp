@@ -20,7 +20,7 @@
 
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
-
+#include "Config.h"
 #include "GameObject.h"
 #include "Language.h"
 #include "Player.h"
@@ -442,6 +442,8 @@ void BattlegroundAV::EndBattleground(uint32 winner)
 {
     //calculate bonuskills for both teams:
     //first towers:
+	uint32 rewardItem = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItem", 60016);
+	uint32 rewardItemCount = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItemCount", 1);
     uint8 kills[2] = {0, 0}; // 0 = Alliance 1 = Horde
     uint8 rep[2] = {0, 0};   // 0 = Alliance 1 = Horde
     for (BG_AV_Nodes i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_FROSTWOLF_WTOWER; ++i)
@@ -470,8 +472,17 @@ void BattlegroundAV::EndBattleground(uint32 winner)
         }
         if (rep[i] != 0)
             RewardReputationToTeam(i == 0 ? 730 : 729, rep[i], i == 0 ? ALLIANCE : HORDE);
-        if (kills[i] != 0)
-            RewardHonorToTeam(GetBonusHonorFromKill(kills[i]), i == 0 ? ALLIANCE : HORDE);
+		if (kills[i] != 0)
+		{
+			RewardHonorToTeam(GetBonusHonorFromKill(kills[i]), i == 0 ? ALLIANCE : HORDE);
+			for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+			{
+				if (Player* player = _GetPlayerForTeam(i == 0 ? ALLIANCE : HORDE, itr, "RewardEndItemToTeam"))
+				{
+					player->AddItem(rewardItem, rewardItemCount);
+				}
+			}
+		}
     }
 
     /// @todo add enterevademode for all attacking creatures

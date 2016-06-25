@@ -24,6 +24,7 @@
 #include "Player.h"
 #include "Util.h"
 #include "ObjectAccessor.h"
+#include "Config.h"
 
 // these variables aren't used outside of this file, so declare them only here
 uint32 BG_EY_HonorScoreTicks[BG_HONOR_MODE_NUM] =
@@ -320,11 +321,32 @@ void BattlegroundEY::UpdateTeamScore(uint32 Team)
 
 void BattlegroundEY::EndBattleground(uint32 winner)
 {
+	uint32 rewardItem = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItem", 60016);
+	uint32 rewardItemCount = sConfigMgr->GetIntDefault("Battlegrounds.End.RewardItemCount", 1);
     // Win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+	if (winner == ALLIANCE)
+	{
+		RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+		for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+		{
+			if (Player* player = _GetPlayerForTeam(ALLIANCE, itr, "RewardHonorToTeam"))
+			{
+				player->AddItem(rewardItem, rewardItemCount);
+			}
+		}
+	}
+
+	if (winner == HORDE)
+	{
+		RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+		for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+		{
+			if (Player* player = _GetPlayerForTeam(HORDE, itr, "RewardHonorToTeam"))
+			{
+				player->AddItem(rewardItem, rewardItemCount);
+			}
+		}
+	}
     // Complete map reward
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);

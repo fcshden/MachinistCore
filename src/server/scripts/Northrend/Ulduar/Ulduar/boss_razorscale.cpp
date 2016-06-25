@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,7 +16,7 @@
  */
 
 /// @todo Harpoon chain from 62505 should not get removed when other chain is applied
-
+#pragma execution_character_set("UTF-8")	
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -136,7 +136,7 @@ enum Events
 };
 
 #define GROUND_Z                                 391.517f
-#define GOSSIP_ITEM_1                            "Activate Harpoons!"
+#define GOSSIP_ITEM_1                            "激活鱼叉！"
 
 enum Misc
 {
@@ -236,9 +236,9 @@ class boss_razorscale_controller : public CreatureScript
                 switch (action)
                 {
                     case ACTION_HARPOON_BUILD:
-                        events.ScheduleEvent(EVENT_BUILD_HARPOON_1, 50000);
+                        events.ScheduleEvent(EVENT_BUILD_HARPOON_1, 10000);
                         if (me->GetMap()->GetSpawnMode() == RAID_DIFFICULTY_25MAN_NORMAL)
-                            events.ScheduleEvent(EVENT_BUILD_HARPOON_3, 90000);
+                            events.ScheduleEvent(EVENT_BUILD_HARPOON_3, 50000);
                         break;
                     case ACTION_PLACE_BROKEN_HARPOON:
                         for (uint8 n = 0; n < RAID_MODE(2, 4); n++)
@@ -261,7 +261,7 @@ class boss_razorscale_controller : public CreatureScript
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f)) //only nearest broken harpoon
                                     BrokenHarpoon->RemoveFromWorld();
-                                events.ScheduleEvent(EVENT_BUILD_HARPOON_2, 20000);
+                                events.ScheduleEvent(EVENT_BUILD_HARPOON_2, 10000);
                                 events.CancelEvent(EVENT_BUILD_HARPOON_1);
                             }
                             return;
@@ -280,7 +280,7 @@ class boss_razorscale_controller : public CreatureScript
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
                                     BrokenHarpoon->RemoveFromWorld();
-                                events.ScheduleEvent(EVENT_BUILD_HARPOON_4, 20000);
+                                events.ScheduleEvent(EVENT_BUILD_HARPOON_4, 10000);
                                 events.CancelEvent(EVENT_BUILD_HARPOON_3);
                             }
                             return;
