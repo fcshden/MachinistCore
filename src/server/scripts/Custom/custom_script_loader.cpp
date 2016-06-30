@@ -28,6 +28,7 @@ void AddSC_cs_world_chat();
 void AddSC_LearnAllSpellsOnLevelChanged();
 void AddSC_clearCombat();
 void AddSC_adam_War();
+void AddSC_changePlayerInfo();
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
@@ -44,4 +45,5 @@ void AddCustomScripts()
 	AddSC_LearnAllSpellsOnLevelChanged();
 	AddSC_clearCombat();
 	AddSC_adam_War();
+	AddSC_changePlayerInfo();
 }

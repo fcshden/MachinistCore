@@ -19439,7 +19439,17 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER);
         stmt->setString(index++, GetName());
         stmt->setUInt8(index++, getRace());
-        stmt->setUInt8(index++, getClass());
+		QueryResult res = CharacterDatabase.PQuery("SELECT `class` FROM `characters` WHERE `guid` = '%u'", GetGUID().GetCounter());
+		if (res)
+		{
+			Field* pField = res->Fetch();
+			uint8 playerClass = pField[0].GetUInt8();
+			stmt->setUInt8(index++, playerClass);
+		}
+		else
+		{
+			stmt->setUInt8(index++, getClass());
+		}
         stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_GENDER));   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, getLevel());
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_XP));
@@ -19607,6 +19617,9 @@ void Player::SaveToDB(bool create /*=false*/)
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
+
+
+
 
 // fast save function for item/money cheating preventing - save only inventory and money state
 void Player::SaveInventoryAndGoldToDB(SQLTransaction& trans)

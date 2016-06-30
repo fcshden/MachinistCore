@@ -4202,3 +4202,20 @@ World.Chat.Cost = 100
 
 #
 ###################################################################################################
+#    玩家信息变更系统
+#        脚本类型 ： NPC脚本
+#        脚本名称 ： change_Player_info
+#        相关设置
+#        changePlayerInfoItemID
+#        说明  :  变更玩家相关信息需要物品的entry
+#		  changePlayerInfoItemCount
+#        说明 ： 变更玩家相关信息需要物品的数量
+#		  changePlayerClassItemCount
+#        说明： 变更玩家职业需要的物品数量
+
+changePlayerInfoItemID = 60005
+changePlayerInfoItemCount = 20
+changePlayerClassItemCount = 600
+
+#
+###################################################################################################
