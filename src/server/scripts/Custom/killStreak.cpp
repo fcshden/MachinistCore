@@ -10,19 +10,9 @@
 #include "WorldSession.h"
 #include "Config.h"
 #include "Chat.h"
-#include "resetRandomItem.h"
 #pragma execution_character_set("UTF-8")
 
 
-bool PvPSystemEnabled = sConfigMgr->GetBoolDefault("PvPSystemEnabled", true);
-bool OnlyInBattlegrounds = sConfigMgr->GetBoolDefault("OnlyInBattlegrounds", true);
-uint32 HowManyTimesYouWantTheKillerToGetAwardedForKillingTheSameVictim = sConfigMgr->GetIntDefault("HowManyTimesYouWantTheKillerToGetAwardedForKillingTheSameVictim", 10);
-const int32 KillerStreak1 = 1;
-const int32 KillerStreak2 = 2;
-const int32 KillerStreak3 = 3;
-const int32 KillerStreak4 = 5;
-const int32 KillerStreak5 = 10;
-int32 KillStreaks[5] = { KillerStreak1, KillerStreak2, KillerStreak3, KillerStreak4, KillerStreak5 };
 
 struct SystemInfo
 {
@@ -40,9 +30,19 @@ public:
 
 	void OnPVPKill(Player* killer, Player* killed) override
 	{
+
+		bool PvPSystemEnabled = sConfigMgr->GetBoolDefault("PvPSystemEnabled", true);
+		bool OnlyInBattlegrounds = sConfigMgr->GetBoolDefault("OnlyInBattlegrounds", true);
+		uint8 HowManyTimesYouWantTheKillerToGetAwardedForKillingTheSameVictim = sConfigMgr->GetIntDefault("HowManyTimesYouWantTheKillerToGetAwardedForKillingTheSameVictim", 10);
+		const uint8 KillerStreak1 = 1;
+		const uint8 KillerStreak2 = 2;
+		const uint8 KillerStreak3 = 3;
+		const uint8 KillerStreak4 = 5;
+		const uint8 KillerStreak5 = 10;
+		int32 KillStreaks[5] = { KillerStreak1, KillerStreak2, KillerStreak3, KillerStreak4, KillerStreak5 };
+
 		if (PvPSystemEnabled == false)
 		{
-
 			return;
 		}
 		else if (PvPSystemEnabled == true)
@@ -118,6 +118,11 @@ public:
 
 			}
 		}
+	}
+
+	void OnLogout(Player* player) override
+	{
+		KillingStreak.erase(player->GetGUID());
 	}
 };
 

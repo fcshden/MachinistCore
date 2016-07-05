@@ -1,12 +1,4 @@
-/*
-
-¸ü¸ÄÍæ¼ÒÏà¹ØĞÅÏ¢
-
-×÷Õß : »úĞµÊ¦
-
-*/
-
-#include <map>
+ï»¿#include <map>
 #include "ScriptMgr.h"	
 #include "DisableMgr.h"
 #include "Player.h"
@@ -15,25 +7,10 @@
 #include "Define.h"
 #include "GossipDef.h"
 #pragma execution_character_set("UTF-8")
-#include "resetRandomItem.h"
 #include "Config.h"
+#include "MachinistCore\MachinistCore.h"
 
-uint32 changePlayerInfoItemID = sConfigMgr->GetIntDefault("changePlayerInfoItemID", 60005);
-uint32 changePlayerInfoItemCount = sConfigMgr->GetIntDefault("changePlayerInfoItemCount", 20);
-uint32 changePlayerClassItemCount = sConfigMgr->GetIntDefault("changePlayerClassItemCount", 600);
-// Êı×Ö×ª×Ö·û´®µÄº¯Êı
-std::string NumberToString(uint64 numberX)
-{
-	auto number = numberX;
-	std::stringstream convert;
-	std::string number32_to_string;
-	convert << number;
-	number32_to_string = convert.str();
-
-	return number32_to_string;
-};
-
-// ¸ù¾İÖ°Òµ·µ»Ø¼¼ÄÜIDÖµ
+// æ ¹æ®èŒä¸šè¿”å›æŠ€èƒ½IDå€¼
 uint32 getPlayerClassSpellId(uint8 playerClass)
 {
 	uint32 playerClassSpellId;
@@ -110,35 +87,35 @@ void playerClassGossipShow(Player* player, uint8 playerClass)
 	switch (playerClass)
 	{
 	case CLASS_WARRIOR:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Sword_27:30:30:-18:0|t |cFF330066 ±ä¸üÎªÕ½Ê¿Ö°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11, "ÄúÈ·¶¨±ä¸üÎªÕ½Ê¿Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Sword_27:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºæˆ˜å£«èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11, "æ‚¨ç¡®å®šå˜æ›´ä¸ºæˆ˜å£«èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_PALADIN:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Hammer_01:30:30:-18:0|t |cFF330066 ±ä¸üÎªÊ¥ÆïÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12, "ÄúÈ·¶¨±ä¸üÎªÊ¥ÆïÊ¿Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Hammer_01:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºåœ£éª‘èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12, "æ‚¨ç¡®å®šå˜æ›´ä¸ºåœ£éª‘å£«èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_HUNTER:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Weapon_Bow_07:30:30:-18:0|t |cFF330066 ±ä¸üÎªÁÔÈËÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 13, "ÄúÈ·¶¨±ä¸üÎªÁÔÈËÖ°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Weapon_Bow_07:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºçŒäººèŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 13, "æ‚¨ç¡®å®šå˜æ›´ä¸ºçŒäººèŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_ROGUE:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_ThrowingKnife_04:30:30:-18:0|t |cFF330066 ±ä¸üÎªµÁÔôÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 14
-			, "ÄúÈ·¶¨±ä¸üÎªµÁÔôÖ°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_ThrowingKnife_04:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºç›—è´¼èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 14
+			, "æ‚¨ç¡®å®šå˜æ›´ä¸ºç›—è´¼èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_PRIEST:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Staff_30:30:30:-18:0|t |cFF330066 ±ä¸üÎªÄÁÊ¦Ö°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 15, "ÄúÈ·¶¨±ä¸üÎªÄÁÊ¦Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Staff_30:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºç‰§å¸ˆèŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 15, "æ‚¨ç¡®å®šå˜æ›´ä¸ºç‰§å¸ˆèŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_DEATH_KNIGHT:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Deathknight_ClassIcon:30:30:-18:0|t |cFF330066 ±ä¸üÎªËÀÆïÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 16, "ÄúÈ·¶¨±ä¸üÎªËÀÍöÆïÊ¿Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Deathknight_ClassIcon:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºæ­»éª‘èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 16, "æ‚¨ç¡®å®šå˜æ›´ä¸ºæ­»äº¡éª‘å£«èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_SHAMAN:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Nature_BloodLust:30:30:-18:0|t |cFF330066 ±ä¸üÎªÈøÂúÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17, "ÄúÈ·¶¨±ä¸üÎªÈøÂú¼ÀË¾Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Nature_BloodLust:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºè¨æ»¡èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17, "æ‚¨ç¡®å®šå˜æ›´ä¸ºè¨æ»¡ç¥­å¸èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_MAGE:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Staff_13:30:30:-18:0|t |cFF330066 ±ä¸üÎª·¨Ê¦Ö°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18, "ÄúÈ·¶¨±ä¸üÎª·¨Ê¦Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\INV_Staff_13:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºæ³•å¸ˆèŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18, "æ‚¨ç¡®å®šå˜æ›´ä¸ºæ³•å¸ˆèŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_WARLOCK:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Nature_FaerieFire:30:30:-18:0|t |cFF330066 ±ä¸üÎªÊõÊ¿Ö°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19, "ÄúÈ·¶¨±ä¸üÎªÊõÊ¿Ö°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Spell_Nature_FaerieFire:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºæœ¯å£«èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19, "æ‚¨ç¡®å®šå˜æ›´ä¸ºæœ¯å£«èŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	case CLASS_DRUID:
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Ability_Druid_Maul:30:30:-18:0|t |cFF330066 ±ä¸üÎªĞ¡µÂÖ°Òµ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20, "ÄúÈ·¶¨±ä¸üÎªµÂÂ³ÒÁÖ°Òµ?\n\n  Ö°Òµ±ä¸üºóĞèÒª´óÍËÔÙ´ÎÉÏÏß³ÉĞ§! \n\n  Çë×ĞÏ¸ÔÄ¶ÁËµÃ÷!", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\icons\\Ability_Druid_Maul:30:30:-18:0|t |cFF330066 å˜æ›´ä¸ºå°å¾·èŒä¸š", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20, "æ‚¨ç¡®å®šå˜æ›´ä¸ºå¾·é²ä¼ŠèŒä¸š?\n\n  èŒä¸šå˜æ›´åéœ€è¦å¤§é€€å†æ¬¡ä¸Šçº¿æˆæ•ˆ! \n\n  è¯·ä»”ç»†é˜…è¯»è¯´æ˜!", 0, false);
 		break;
 	}
 };
@@ -148,31 +125,40 @@ class changePlayerInfo : public CreatureScript
 public:
 	changePlayerInfo() : CreatureScript("change_Player_info") { }
 
+	uint32 changePlayerInfoItemID = sConfigMgr->GetIntDefault("change.PlayerInfo.ItemID", 60005);
+	uint32 changePlayerInfoItemCount = sConfigMgr->GetIntDefault("change.PlayerInfo.ItemCount", 20);
+	uint32 changePlayerClassItemCount = sConfigMgr->GetIntDefault("change.PlayerClass.ItemCount", 200);
+
 	bool OnGossipHello(Player* player, Creature* creature) override
 	{
+
+
 		if (player->IsInCombat())
 		{
-			player->GetSession()->SendNotification("ÄúÔÚÕ½¶·ÖĞÅ¶, ²»¿ÉÒÔºÍÎÒ¶Ô»°!");
+			player->GetSession()->SendNotification("æ‚¨åœ¨æˆ˜æ–—ä¸­å“¦, ä¸å¯ä»¥å’Œæˆ‘å¯¹è¯!");
 			player->CLOSE_GOSSIP_MENU();
 			return false;
 		}
 		WorldSession* session = player->GetSession();
 		player->PlayerTalkClass->ClearMenus();
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 ±ä¸ü½ÇÉ«ĞÕÃû " + sResetRandomItem->GetItemLink(changePlayerInfoItemID, session) + " x " + NumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1, "ÄãÈ·¶¨ĞèÒª±ä¸üĞÕÃû?", 0, false);
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 ±ä¸ü½ÇÉ«Íâ¹Û " + sResetRandomItem->GetItemLink(changePlayerInfoItemID, session) + " x " + NumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2, "ÄãÈ·¶¨ĞèÒª±ä¸üÍâ¹Û?", 0, false);
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 ±ä¸ü½ÇÉ«ÕóÓª " + sResetRandomItem->GetItemLink(changePlayerInfoItemID, session) + " x " + NumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3, "ÄãÈ·¶¨ĞèÒª±ä¸üÕóÓª?", 0, false);
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 ±ä¸ü½ÇÉ«ÖÖ×å " + sResetRandomItem->GetItemLink(changePlayerInfoItemID, session) + " x " + NumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4, "ÄãÈ·¶¨ĞèÒª±ä¸üÖÖ×å?", 0, false);
-		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 ±ä¸ü½ÇÉ«Ö°Òµ " + sResetRandomItem->GetItemLink(changePlayerInfoItemID, session) + " x " + NumberToString(changePlayerClassItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5 ,"ÄãÈ·¶¨ĞèÒª±ä¸üÖÖ×å?\n\n Ö»ÄÜ±ä¸ü±¾ÖÖ×å¿ÉÒÔÑ¡ÔñµÄÖ°Òµ! \n\n ²¢ÇÒÍÑµôËùÓĞ×°±¸ \n\nÇëÔÄ¶ÁËµÃ÷ºó½÷É÷Ñ¡Ôñ! ", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 å˜æ›´è§’è‰²å§“å " + sMachinistCore->GetItemLink(changePlayerInfoItemID, session) + " x " + sMachinistCore->ConvertNumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1, "ä½ ç¡®å®šéœ€è¦å˜æ›´å§“å?", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 å˜æ›´è§’è‰²å¤–è§‚ " + sMachinistCore->GetItemLink(changePlayerInfoItemID, session) + " x " + sMachinistCore->ConvertNumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2, "ä½ ç¡®å®šéœ€è¦å˜æ›´å¤–è§‚?", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 å˜æ›´è§’è‰²é˜µè¥ " + sMachinistCore->GetItemLink(changePlayerInfoItemID, session) + " x " + sMachinistCore->ConvertNumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3, "ä½ ç¡®å®šéœ€è¦å˜æ›´é˜µè¥?", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 å˜æ›´è§’è‰²ç§æ— " + sMachinistCore->GetItemLink(changePlayerInfoItemID, session) + " x " + sMachinistCore->ConvertNumberToString(changePlayerInfoItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4, "ä½ ç¡®å®šéœ€è¦å˜æ›´ç§æ—?", 0, false);
+		player->ADD_GOSSIP_ITEM_EXTENDED(1, "|TInterface\\ICONS\\Spell_Holy_HopeAndGrace:30:30:-18:0|t |cFF330066 å˜æ›´è§’è‰²èŒä¸š " + sMachinistCore->GetItemLink(changePlayerInfoItemID, session) + " x " + sMachinistCore->ConvertNumberToString(changePlayerClassItemCount), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5, "ä½ ç¡®å®šéœ€è¦å˜æ›´èŒä¸š?\n\n åªèƒ½å˜æ›´æœ¬ç§æ—å¯ä»¥é€‰æ‹©çš„èŒä¸š! \n\n å¹¶ä¸”è„±æ‰æ‰€æœ‰è£…å¤‡ \n\nè§£æ•£æ‰€æœ‰å® ç‰© \n\nè¯·é˜…è¯»è¯´æ˜åè°¨æ…é€‰æ‹©! ", 0, false);
 		player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 		return true;
 	}
 
 	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
 	{
+
 		if (!player)
 			return false;
 
 		uint8 maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+
+		Pet* pet = player->GetPet();
 
 		player->PlayerTalkClass->ClearMenus();
 
@@ -183,14 +169,14 @@ public:
 			{
 				player->SetAtLoginFlag(AT_LOGIN_RENAME);
 				player->DestroyItemCount(changePlayerInfoItemID, changePlayerInfoItemCount, true);
-				player->GetSession()->SendNotification("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«Ãû³Æ!");
-				ChatHandler(player->GetSession()).SendSysMessage("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«Ãû³Æ!");
+				player->GetSession()->SendNotification("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²åç§°!");
+				ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²åç§°!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			else
 			{
-				player->GetSession()->SendNotification("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
-				ChatHandler(player->GetSession()).SendSysMessage("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
+				player->GetSession()->SendNotification("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
+				ChatHandler(player->GetSession()).SendSysMessage("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			break;
@@ -200,14 +186,14 @@ public:
 			{
 				player->SetAtLoginFlag(AT_LOGIN_CUSTOMIZE);
 				player->DestroyItemCount(changePlayerInfoItemID, changePlayerInfoItemCount, true);
-				player->GetSession()->SendNotification("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«Íâ¹Û!");
-				ChatHandler(player->GetSession()).SendSysMessage("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«Íâ¹Û!");
+				player->GetSession()->SendNotification("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²å¤–è§‚!");
+				ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²å¤–è§‚!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			else
 			{
-				player->GetSession()->SendNotification("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
-				ChatHandler(player->GetSession()).SendSysMessage("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
+				player->GetSession()->SendNotification("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
+				ChatHandler(player->GetSession()).SendSysMessage("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			break;
@@ -217,14 +203,14 @@ public:
 			{
 				player->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
 				player->DestroyItemCount(changePlayerInfoItemID, changePlayerInfoItemCount, true);
-				player->GetSession()->SendNotification("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«ÕóÓª!");
-				ChatHandler(player->GetSession()).SendSysMessage("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«ÕóÓª!");
+				player->GetSession()->SendNotification("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²é˜µè¥!");
+				ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²é˜µè¥!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			else
 			{
-				player->GetSession()->SendNotification("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
-				ChatHandler(player->GetSession()).SendSysMessage("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
+				player->GetSession()->SendNotification("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
+				ChatHandler(player->GetSession()).SendSysMessage("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			break;
@@ -234,41 +220,53 @@ public:
 			{
 				player->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
 				player->DestroyItemCount(changePlayerInfoItemID, changePlayerInfoItemCount, true);
-				player->GetSession()->SendNotification("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«ÖÖ×å!");
-				ChatHandler(player->GetSession()).SendSysMessage("±ä¸ü³É¹¦!Íæ¼Ò·µ»Øµ½½ÇÉ«Ñ¡Ôñ½çÃæ¼´¿ÉĞŞ¸Ä½ÇÉ«ÖÖ×å!");
+				player->GetSession()->SendNotification("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²ç§æ—!");
+				ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´æˆåŠŸ!ç©å®¶è¿”å›åˆ°è§’è‰²é€‰æ‹©ç•Œé¢å³å¯ä¿®æ”¹è§’è‰²ç§æ—!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			else
 			{
-				player->GetSession()->SendNotification("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
-				ChatHandler(player->GetSession()).SendSysMessage("ËùĞèÎïÆ·ÊıÁ¿²»×ã²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
+				player->GetSession()->SendNotification("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
+				ChatHandler(player->GetSession()).SendSysMessage("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			break;
 
 		case GOSSIP_ACTION_INFO_DEF + 5:
 
-			// ÒªÇóÍæ¼ÒÍÑµôËùÓĞ×°±¸
+			// è¦æ±‚ç©å®¶è„±æ‰æ‰€æœ‰è£…å¤‡
 			for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
 			{
 				Item* playerEquip = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
 					if (playerEquip)
 					{
-						player->GetSession()->SendNotification("±ä¸üÖ°ÒµĞèÒªÍÑµôËùÓĞ×°±¸, ÇëÈ·ÈÏÄúµÄ×°±¸ÒÑ¾­ÍÑÏÂ!");
-						ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµĞèÒªÍÑµôËùÓĞ×°±¸, ÇëÈ·ÈÏÄúµÄ×°±¸ÒÑ¾­ÍÑÏÂ!");
+						player->GetSession()->SendNotification("å˜æ›´èŒä¸šéœ€è¦è„±æ‰æ‰€æœ‰è£…å¤‡, è¯·ç¡®è®¤æ‚¨çš„è£…å¤‡å·²ç»è„±ä¸‹!");
+						ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šéœ€è¦è„±æ‰æ‰€æœ‰è£…å¤‡, è¯·ç¡®è®¤æ‚¨çš„è£…å¤‡å·²ç»è„±ä¸‹!");
 						player->CLOSE_GOSSIP_MENU();
 						return true;
 					}
 			}
 
+			// åˆ¤æ–­ç©å®¶æ˜¯å¦æœ‰å® ç‰©
+			if (pet)
+			{
+				player->GetSession()->SendNotification("å˜æ›´èŒä¸šéœ€è¦è§£æ•£æ‰€æœ‰å® ç‰©, è¯·ç¡®è®¤æ‚¨å·²ç»è§£æ•£æ‰€æœ‰å® ç‰©!");
+				ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šéœ€è¦è§£æ•£æ‰€æœ‰å® ç‰©, è¯·ç¡®è®¤æ‚¨å·²ç»è§£æ•£æ‰€æœ‰å® ç‰©!");
+				player->CLOSE_GOSSIP_MENU();
+				return true;
+			}
+
 			if (player->HasItemCount(changePlayerInfoItemID, changePlayerInfoItemCount) && maxLevel == player->getLevel())
 			{
-				// ÏÈÖØÖÃÌì¸³
+				
+				// å…ˆé‡ç½®å¤©èµ‹
 				player->ResetTalents();
-				// ÒÅÍüËùÓĞÖ°Òµ¼¼ÄÜ
+				// å»æ‰ç©å®¶æ‰€æœ‰aura
+				player->RemoveAllAuras();
+				// é—å¿˜æ‰€æœ‰èŒä¸šæŠ€èƒ½
 				forgetPlayerClassSpell(player);
 
-				if (player->getRace() == RACE_HUMAN) // ÈËÀà zs qs dz ms sq fs ss
+				if (player->getRace() == RACE_HUMAN) // äººç±» zs qs dz ms sq fs ss
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -287,7 +285,7 @@ public:
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				
 				}
-				else if (player->getRace() == RACE_ORC) // ÊŞÈË zs lr dz sq sm ss
+				else if (player->getRace() == RACE_ORC) // å…½äºº zs lr dz sq sm ss
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -303,7 +301,7 @@ public:
 						playerClassGossipShow(player, CLASS_WARLOCK);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_DWARF) // °«ÈË zs qs lr zd ms sq 
+				else if (player->getRace() == RACE_DWARF) // çŸ®äºº zs qs lr zd ms sq 
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -319,7 +317,7 @@ public:
 						playerClassGossipShow(player, CLASS_DEATH_KNIGHT);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_NIGHTELF) // °µÒ¹¾«Áé zs lr zd ms sq xd
+				else if (player->getRace() == RACE_NIGHTELF) // æš—å¤œç²¾çµ zs lr zd ms sq xd
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -335,7 +333,7 @@ public:
 						playerClassGossipShow(player, CLASS_DRUID);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_UNDEAD_PLAYER) // ²»ËÀ×å zs dz ms sq fs ss
+				else if (player->getRace() == RACE_UNDEAD_PLAYER) // ä¸æ­»æ— zs dz ms sq fs ss
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -351,7 +349,7 @@ public:
 						playerClassGossipShow(player, CLASS_WARLOCK);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_TAUREN) // Å£Í·ÈË zs lr sq sm dx
+				else if (player->getRace() == RACE_TAUREN) // ç‰›å¤´äºº zs lr sq sm dx
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -365,7 +363,7 @@ public:
 						playerClassGossipShow(player, CLASS_DRUID);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_GNOME) // ÙªÈå zs dz sq fs ss 
+				else if (player->getRace() == RACE_GNOME) // ä¾å„’ zs dz sq fs ss 
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -380,7 +378,7 @@ public:
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 
 				}
-				else if (player->getRace() == RACE_TROLL) // ¾ŞÄ§ za lr zd ms sq sm fs
+				else if (player->getRace() == RACE_TROLL) // å·¨é­” za lr zd ms sq sm fs
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -398,7 +396,7 @@ public:
 						playerClassGossipShow(player, CLASS_MAGE);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_BLOODELF) // Ñª¾«Áé qs lr zd ms sq fs ss
+				else if (player->getRace() == RACE_BLOODELF) // è¡€ç²¾çµ qs lr zd ms sq fs ss
 				{
 					if (player->getClass() != CLASS_PALADIN)
 						playerClassGossipShow(player, CLASS_PALADIN);
@@ -416,7 +414,7 @@ public:
 						playerClassGossipShow(player, CLASS_WARLOCK);
 					player->SEND_GOSSIP_MENU(1, creature->GetGUID());
 				}
-				else if (player->getRace() == RACE_DRAENEI) // µÂÀ³Äá zs qs lr ms sq sm fs
+				else if (player->getRace() == RACE_DRAENEI) // å¾·è±å°¼ zs qs lr ms sq sm fs
 				{
 					if (player->getClass() != CLASS_WARRIOR)
 						playerClassGossipShow(player, CLASS_WARRIOR);
@@ -438,109 +436,119 @@ public:
 			}
 			else
 			{
-				player->GetSession()->SendNotification("ËùĞèÎïÆ·ÊıÁ¿²»×ã»òÕßµÈ¼¶²»×ã80¼¶, ²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
-				ChatHandler(player->GetSession()).SendSysMessage("ËùĞèÎïÆ·ÊıÁ¿²»×ã»òÕßµÈ¼¶²»×ã80¼¶, ²»ÄÜÊ¹ÓÃ¸Ã¹¦ÄÜ!");
+				player->GetSession()->SendNotification("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³æˆ–è€…ç­‰çº§ä¸è¶³80çº§, ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
+				ChatHandler(player->GetSession()).SendSysMessage("æ‰€éœ€ç‰©å“æ•°é‡ä¸è¶³æˆ–è€…ç­‰çº§ä¸è¶³80çº§, ä¸èƒ½ä½¿ç”¨è¯¥åŠŸèƒ½!");
 				player->CLOSE_GOSSIP_MENU();
 			}
 			break;
-		case GOSSIP_ACTION_INFO_DEF + 11: // ±ä¸üÕ½Ê¿
+		case GOSSIP_ACTION_INFO_DEF + 11: // å˜æ›´æˆ˜å£«
 			CharacterDatabase.PExecute("UPDATE characters SET class = 1 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_WARRIOR);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ");
 			player->CLOSE_GOSSIP_MENU();				
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 12: // ±ä¸üÊ¥ÆïÊ¿
+		case GOSSIP_ACTION_INFO_DEF + 12: // å˜æ›´åœ£éª‘å£«
 			CharacterDatabase.PExecute("UPDATE characters SET class = 2 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_PALADIN);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 13: // ±ä¸üÁÔÈË
+		case GOSSIP_ACTION_INFO_DEF + 13: // å˜æ›´çŒäºº
 			CharacterDatabase.PExecute("UPDATE characters SET class = 3 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_HUNTER);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 14: // ±ä¸üµÁÔô
+		case GOSSIP_ACTION_INFO_DEF + 14: // å˜æ›´ç›—è´¼
 			CharacterDatabase.PExecute("UPDATE characters SET class = 4 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_ROGUE);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 15: // ±ä¸üÄÁÊ¦
+		case GOSSIP_ACTION_INFO_DEF + 15: // å˜æ›´ç‰§å¸ˆ
 			CharacterDatabase.PExecute("UPDATE characters SET class = 5 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_PRIEST);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 16: // ±ä¸üËÀÍöÆïÊ¿
+		case GOSSIP_ACTION_INFO_DEF + 16: // å˜æ›´æ­»äº¡éª‘å£«
 			CharacterDatabase.PExecute("UPDATE characters SET class = 6 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_DEATH_KNIGHT);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 17: // ±ä¸üÈøÂú
+		case GOSSIP_ACTION_INFO_DEF + 17: // å˜æ›´è¨æ»¡
 			CharacterDatabase.PExecute("UPDATE characters SET class = 7 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_SHAMAN);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 18: // ±ä¸ü·¨Ê¦
+		case GOSSIP_ACTION_INFO_DEF + 18: // å˜æ›´æ³•å¸ˆ
 			CharacterDatabase.PExecute("UPDATE characters SET class = 8 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_MAGE);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 19: // ±ä¸üÊõÊ¿
+		case GOSSIP_ACTION_INFO_DEF + 19: // å˜æ›´æœ¯å£«
 			CharacterDatabase.PExecute("UPDATE characters SET class = 9 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_WARLOCK);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 
-		case GOSSIP_ACTION_INFO_DEF + 20: // ±ä¸üµÂÂ³ÒÁ
+		case GOSSIP_ACTION_INFO_DEF + 20: // å˜æ›´å¾·é²ä¼Š
 			CharacterDatabase.PExecute("UPDATE characters SET class = 11 WHERE guid = %u;", player->GetGUID().GetCounter());
 			CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u;", player->GetGUID().GetCounter());
 			//learnPlayerClassSpell(player, CLASS_DRUID);
 			player->DestroyItemCount(changePlayerInfoItemID, changePlayerClassItemCount, true);
-			player->GetSession()->SendNotification("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
-			ChatHandler(player->GetSession()).SendSysMessage("±ä¸üÖ°ÒµÍê±Ï, Çë´óÍËºóÔÙ´ÎÉÏÏßÉúĞ§!");
+			player->GetSession()->SendNotification("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
+			ChatHandler(player->GetSession()).SendSysMessage("å˜æ›´èŒä¸šå®Œæ¯•, è¯·å¤§é€€åå†æ¬¡ä¸Šçº¿ç”Ÿæ•ˆ!");
 			player->CLOSE_GOSSIP_MENU();
+			player->SetClientControl(player, false);
 			break;
 		}
 
@@ -548,8 +556,6 @@ public:
 	}
 
 };
-
-
 
 void AddSC_changePlayerInfo()
 {

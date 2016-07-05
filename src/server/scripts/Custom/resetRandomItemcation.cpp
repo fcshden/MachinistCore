@@ -21,9 +21,8 @@
 #include "SharedDefines.h"
 #include "Transaction.h"
 #include "WorldSession.h"
-#include <sstream>
-#include <string>
 #include "resetRandomItem.h"
+#include "MachinistCore\MachinistCore.h"
 #pragma execution_character_set("UTF-8")
 
  ResetRandomItem* ResetRandomItem::instance()
@@ -84,28 +83,6 @@ std::string ResetRandomItem::GetSlotIcon(uint8 slot, uint32 width, uint32 height
 }
 
 
-
-// 获取物品图标
-std::string ResetRandomItem::GetItemIcon(uint32 entry, uint32 width, uint32 height, int x, int y) const
-{
-	TC_LOG_DEBUG("custom.resetRandomItem", "ResetRandomItem::GetItemIcon");
-
-	std::ostringstream ss;
-	ss << "|TInterface";
-	const ItemTemplate* temp = sObjectMgr->GetItemTemplate(entry);
-	const ItemDisplayInfoEntry* dispInfo = NULL;
-	if (temp)
-	{
-		dispInfo = sItemDisplayInfoStore.LookupEntry(temp->DisplayInfoID);
-		if (dispInfo)
-			ss << "/ICONS/" << dispInfo->inventoryIcon;
-	}
-	if (!dispInfo)
-		ss << "/InventoryItems/WoWUnknownItem01";
-	ss << ":" << width << ":" << height << ":" << x << ":" << y << "|t";
-	return ss.str();
-}
-
 // 可以重置的装备
 bool ResetRandomItem::CanResetRandomItem(Player* player, ItemTemplate const* target, ItemTemplate const* source) const //ItemTemplate const* target,
 {
@@ -151,7 +128,7 @@ void ResetRandomItem::resetItemAction(Player* player, ObjectGuid itemGUID)const
 	WorldSession* session = player->GetSession();
 	char count[256];
 	itoa(randomItemCount, count, 10);
-	std::string resetRandomLink = sResetRandomItem->GetItemLink(randomItemEntry, session);
+	std::string resetRandomLink = sMachinistCore->GetItemLink(randomItemEntry, session);
 	std::string message_1 = "重置物品随机附魔消耗" + resetRandomLink + " x " + count + " 枚！";
 	std::string message = "|CFFFF0000您的" + resetRandomLink + "|CFFFF0000数量不足 " + count + "|CFFFF0000 枚！";
 	
@@ -199,73 +176,4 @@ void ResetRandomItem::resetItemAction(Player* player, ObjectGuid itemGUID)const
 			}
 		}
 	}
-}
-
-/*  获取获取装备链接 */
-std::string ResetRandomItem::GetItemLink(uint32 entry, WorldSession* session) const
-{
-	TC_LOG_DEBUG("custom.resetRandomItem", "ResetRandomItem::GetItemLink");
-
-	const ItemTemplate* temp = sObjectMgr->GetItemTemplate(entry);
-	int loc_idx = session->GetSessionDbLocaleIndex();
-	std::string name = temp->Name1;
-	if (ItemLocale const* il = sObjectMgr->GetItemLocale(entry))
-		ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
-
-	std::ostringstream oss;
-	oss << "|c" << std::hex << ItemQualityColors[temp->Quality] << std::dec <<
-		"|Hitem:" << entry << ":0:0:0:0:0:0:0:0:0|h[" << name << "]|h|r";
-
-	return oss.str();
-}
-
-
-std::string ResetRandomItem::GetItemLink(Item* item, WorldSession* session) const
-{
-	TC_LOG_DEBUG("custom.transmog", "Transmogrification::GetItemLink");
-
-	int loc_idx = session->GetSessionDbLocaleIndex();
-	const ItemTemplate* temp = item->GetTemplate();
-	std::string name = temp->Name1;
-	if (ItemLocale const* il = sObjectMgr->GetItemLocale(temp->ItemId))
-		ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
-
-	if (int32 itemRandPropId = item->GetItemRandomPropertyId())
-	{
-		char* const* suffix = NULL;
-		if (itemRandPropId < 0)
-		{
-			const ItemRandomSuffixEntry* itemRandEntry = sItemRandomSuffixStore.LookupEntry(-item->GetItemRandomPropertyId());
-			if (itemRandEntry)
-				suffix = itemRandEntry->nameSuffix;
-		}
-		else
-		{
-			const ItemRandomPropertiesEntry* itemRandEntry = sItemRandomPropertiesStore.LookupEntry(item->GetItemRandomPropertyId());
-			if (itemRandEntry)
-				suffix = itemRandEntry->nameSuffix;
-		}
-		if (suffix)
-		{
-			std::string test(suffix[(name != temp->Name1) ? loc_idx : DEFAULT_LOCALE]);
-			if (!test.empty())
-			{
-				name += ' ';
-				name += test;
-			}
-		}
-	}
-
-	std::ostringstream oss;
-	oss << "|c" << std::hex << ItemQualityColors[temp->Quality] << std::dec <<
-		"|Hitem:" << temp->ItemId << ":" <<
-		item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) << ":" <<
-		item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT) << ":" <<
-		item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_2) << ":" <<
-		item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_3) << ":" <<
-		item->GetEnchantmentId(BONUS_ENCHANTMENT_SLOT) << ":" <<
-		item->GetItemRandomPropertyId() << ":" << item->GetItemSuffixFactor() << ":" <<
-		(uint32)item->GetOwner()->getLevel() << "|h[" << name << "]|h|r";
-
-	return oss.str();
 }

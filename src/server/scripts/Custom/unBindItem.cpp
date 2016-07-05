@@ -10,7 +10,7 @@
 #include "WorldSession.h"
 #include "Config.h"
 #include "Chat.h"
-#include "resetRandomItem.h"
+#include "MachinistCore\MachinistCore.h"
 #pragma execution_character_set("UTF-8")
 
 class unBindItem : public ItemScript
@@ -18,6 +18,10 @@ class unBindItem : public ItemScript
 public:
 
 	unBindItem() : ItemScript("unBind_item") {}
+
+	// 读取配置文件
+	uint32 unBindItemEntry = sConfigMgr->GetIntDefault("unBindItemEntry", 60005);
+	uint32 unBindItemCount = sConfigMgr->GetIntDefault("unBindItemCount", 2);
 
 	bool OnUse(Player* player, Item* item, SpellCastTargets const& targets) override
 	{
@@ -44,13 +48,9 @@ public:
 		// 保存entry
 		uint32 targetItemGUID= tar->GetGUID();
 
-		// 读取配置文件
-		uint32 unBindItemEntry = sConfigMgr->GetIntDefault("unBindItemEntry", 60005);
-		uint32 unBindItemCount = sConfigMgr->GetIntDefault("unBindItemCount", 2);
-
 		// 获取消耗物品链接
 		WorldSession* session = player->GetSession();
-		std::string unBindItemLink = sResetRandomItem->GetItemLink(unBindItemEntry, session);
+		std::string unBindItemLink = sMachinistCore->GetItemLink(unBindItemEntry, session);
 
 		// 拼提示字符
 		char count[256];
@@ -88,7 +88,7 @@ public:
 
 		// 获取消耗物品链接
 		WorldSession* session = player->GetSession();
-		std::string unBindItemLink = sResetRandomItem->GetItemLink(unBindItemEntry, session);
+		std::string unBindItemLink = sMachinistCore->GetItemLink(unBindItemEntry, session);
 
 		char count[256];
 		itoa(unBindItemCount, count, 10);

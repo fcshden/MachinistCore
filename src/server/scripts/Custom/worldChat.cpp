@@ -9,8 +9,6 @@ const char* CLASS_ICON;
 const char* RACE_ICON;
 #define FACTION_SPECIFIC 0
 
-
-
 std::string GetNameLink(Player* player)
 {
 	std::string name = player->GetName();
@@ -148,6 +146,7 @@ public:
 
 	static bool HandleWorldChatCommand(ChatHandler * handler, const char * args)
 	{
+		int chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
 
 		if (!handler->GetSession()->GetPlayer()->CanSpeak())
 			return false;
@@ -210,9 +209,7 @@ public:
 		}
 
 		msg += args;
-
-		int chatCost = sConfigMgr->GetIntDefault("World.Chat.Cost", 100);
-
+		
 		if (FACTION_SPECIFIC)
 		{
 			if (player->HasEnoughMoney(chatCost))
@@ -255,6 +252,8 @@ public:
 
 	void OnLogin(Player* player, bool /*firstLogin*/) override
 	{
+
+
 		ChatHandler(player->GetSession()).PSendSysMessage("|CFFFF0000[系统提示]|r世界聊天频道已经开启, 每次聊天消耗%u银币, 聊天命令为：.chat + 聊天内容!", uint32(chatCost * 0.01));
 	}
 };

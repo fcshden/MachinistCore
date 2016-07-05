@@ -13,8 +13,8 @@
 #include "WorldSession.h"
 #include "Config.h"
 #include "Chat.h"
-#include "resetRandomItem.h"
 #include "Machinist_VIP_Core.h"
+#include "MachinistCore\MachinistCore.h"
 #pragma execution_character_set("UTF-8")
 
 
@@ -22,7 +22,6 @@ class itemUpgrade : public ItemScript
 {
 public:
 	itemUpgrade() :ItemScript("item_Upgrade"){}
-
 
 	uint32 luckyStoneEntry = sConfigMgr->GetIntDefault("luckyStoneEntry", 60003);
 	uint32 uncrazyStoneEntry = sConfigMgr->GetIntDefault("uncrazyStoneEntry", 60004);
@@ -35,9 +34,7 @@ public:
 
 		// 获取玩家VIP等级
 		uint32 acct_id = player->GetSession()->GetAccountId();
-		uint32 Pvip = VIP::GetVIP(acct_id);
-
-
+		uint8 Pvip = VIP::GetVIP(acct_id);
 
 		WorldSession* session = player->GetSession();
 
@@ -74,49 +71,26 @@ public:
 		uint32 chance = fieldsDB[8].GetUInt32();
 		uint32 crazing = fieldsDB[9].GetUInt32();//  为0物品不碎裂， 为1物品碎裂
 
-		std::string upItemLink = sResetRandomItem->GetItemLink(tarEntry, session);
-		std::string mat1Link = sResetRandomItem->GetItemLink(id1, session);
-		std::string mat2Link = sResetRandomItem->GetItemLink(id2, session);
-		std::string mat3Link = sResetRandomItem->GetItemLink(id3, session);
-		std::string upedItemLink = sResetRandomItem->GetItemLink(upid, session);
-
-		char chanceChar[128];
-		itoa(chance, chanceChar, 10);
-		std::string strchance = chanceChar;
-
-		char material1NUM[128];
-		itoa(amount1, material1NUM, 10);
-		std::string strMaterial1NUM = material1NUM;
-
-		char material2NUM[128];
-		itoa(amount2, material2NUM, 10);
-		std::string strMaterial2NUM = material2NUM;
-
-		char material3NUM[128];
-		itoa(amount3, material3NUM, 10);
-		std::string strMaterial3NUM = material3NUM;
-
-		char VIPchance[128];
-		itoa(Pvip, VIPchance, 10);
-		std::string vipChance = VIPchance;
+		std::string upItemLink = sMachinistCore->GetItemLink(tarEntry, session);
+		std::string mat1Link = sMachinistCore->GetItemLink(id1, session);
+		std::string mat2Link = sMachinistCore->GetItemLink(id2, session);
+		std::string mat3Link = sMachinistCore->GetItemLink(id3, session);
+		std::string upedItemLink = sMachinistCore->GetItemLink(upid, session);
 
 		player->PlayerTalkClass->ClearMenus();
 		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_12.blp:27|t |cFF330066 升级前物品：" + upItemLink, tarEntry, GOSSIP_ACTION_INFO_DEF + 1);
-		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料①：" + mat1Link + "×" + strMaterial1NUM, tarEntry, GOSSIP_ACTION_INFO_DEF + 2);
-		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料②：" + mat2Link + "×" + strMaterial2NUM, tarEntry, GOSSIP_ACTION_INFO_DEF + 3);
-		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料③：" + mat3Link + "×" + strMaterial3NUM, tarEntry, GOSSIP_ACTION_INFO_DEF + 4);
+		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料①：" + mat1Link + "×" + sMachinistCore->ConvertNumberToString(amount1), tarEntry, GOSSIP_ACTION_INFO_DEF + 2);
+		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料②：" + mat2Link + "×" + sMachinistCore->ConvertNumberToString(amount2), tarEntry, GOSSIP_ACTION_INFO_DEF + 3);
+		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 需要材料③：" + mat3Link + "×" + sMachinistCore->ConvertNumberToString(amount3), tarEntry, GOSSIP_ACTION_INFO_DEF + 4);
 		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 升级后物品：" + upedItemLink, tarEntry, GOSSIP_ACTION_INFO_DEF + 5);
-		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 本次升级成功概率：" + strchance + "%", tarEntry, GOSSIP_ACTION_INFO_DEF + 6);
+		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_P_01.blp:27|t |cFF330066 本次升级成功概率：" + sMachinistCore->ConvertNumberToString(chance) + "%", tarEntry, GOSSIP_ACTION_INFO_DEF + 6);
 
 		if (player->HasItemCount(luckyStoneEntry))
 		{
 			if (chance <= 90)
 			{
 				uint32 luckyChance = chance + 10; // 幸运宝石加10%概率
-				char luckychance[128];
-				itoa(luckyChance, luckychance, 10);
-				std::string strchance_1 = luckychance;
-				player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_h_15.blp:27|t |cFF330066 幸运宝珠加成后概率：" + strchance_1 + "%", tarEntry, GOSSIP_ACTION_INFO_DEF + 7);
+				player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_h_15.blp:27|t |cFF330066 幸运宝珠加成后概率：" + sMachinistCore->ConvertNumberToString(luckyChance) + "%", tarEntry, GOSSIP_ACTION_INFO_DEF + 7);
 			}
 			else
 			{
@@ -124,7 +98,7 @@ public:
 			}
 		}
 
-		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_h_15.blp:27|t |cFF330066 VIP等级强化成功提升概率：" + vipChance + " %", tarEntry, GOSSIP_ACTION_INFO_DEF + 12);
+		player->ADD_GOSSIP_ITEM(1, "|TInterface\\ICONS\\Achievement_PVP_h_15.blp:27|t |cFF330066 VIP等级强化成功提升概率：" + sMachinistCore->ConvertNumberToString(Pvip) + " %", tarEntry, GOSSIP_ACTION_INFO_DEF + 12);
 
 		if (0 == crazing)
 		{
@@ -170,10 +144,15 @@ public:
 		uint32 amount3 = fieldsDB[7].GetUInt32();
 		uint32 chance = fieldsDB[8].GetUInt32();
 		uint32 crazing = fieldsDB[9].GetUInt32();//  为0物品不碎裂， 为1物品碎裂
-		std::string upedItemLink = sResetRandomItem->GetItemLink(upid, session);
+		std::string upedItemLink = sMachinistCore->GetItemLink(upid, session);
+
+		// 获取玩家VIP等级
+		uint32 acct_id = player->GetSession()->GetAccountId();
+		uint8 Pvip = VIP::GetVIP(acct_id);
+		chance = chance + Pvip;
 		if (50 < chance)
 		{
-			chance = chance - 15;
+			chance = chance - 5;
 		}
 		switch (action)
 		{

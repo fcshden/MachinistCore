@@ -12,23 +12,17 @@
 #include <unordered_map>
 #include "World.h"
 #pragma execution_character_set("UTF-8")
-#include "../../scripts/Custom/resetRandomItem.h"
+#include "MachinistCore\MachinistCore.h"
 #include "WorldSession.h"
 
 // color definitions since i hate yellow..
 std::string green = "|cff00cc00";
-std::string red = "|cffFF0000";
 std::string white = "|cffFFFFFF";
-std::string blue = "|cff3333FF";
-std::string black = "|cff000000";
-
 float ver = 1.00f;
-
-uint32 VIP_MAX;
-uint32 VIP_TP_BONUS;
+uint8 VIP_MAX;
+uint8 VIP_TP_BONUS;
 uint32 VIP_UPGRADEITEM_ID;
-uint32 VIP_JF_COUNT;
-uint32 VIP_CANUSETELEPORTLEVEL;
+uint8 VIP_CANUSETELEPORTLEVEL;
 int VIP_TELEPORT_COST;
 float VIP_OFFSET;
 float VIP_MONEY_BONUS;
@@ -44,24 +38,13 @@ VIP::~VIP()
 {
 }
 
-std::string ConvertNumberToString(uint64 numberX)
-{
-	auto number = numberX;
-	std::stringstream convert;
-	std::string number32_to_string;
-	convert << number;
-	number32_to_string = convert.str();
-
-	return number32_to_string;
-};
-
 void AnnounceLoggingToWorld(Player* player, uint32 type)
 {
 	std::string pName = player->GetName();
 	uint32 acct_id = player->GetSession()->GetAccountId();
-	uint32 PlayerLogInVip = VIP::GetVIP(acct_id);
+	uint8 PlayerLogInVip = VIP::GetVIP(acct_id);
 
-	std::string msg = "|CFFFF0000[会员频道]|r[" + green + "VIP>>" + ConvertNumberToString(PlayerLogInVip) + "级玩家|r]: ";
+	std::string msg = "|CFFFF0000[会员频道]|r[" + green + "VIP>>" + sMachinistCore->ConvertNumberToString(PlayerLogInVip) + "级玩家|r]: ";
 	msg = msg + pName + green + " 踏着七彩祥云，";
 
 	if (type == 1) { msg = msg + "进入游戏服务器|r"; };
@@ -85,6 +68,7 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 			TC_LOG_INFO("server.loading", "|-                               -|");
 			TC_LOG_INFO("server.loading", "|____________Ver:%.1f_____________|", ver);
 
+			ItemVip.clear();
 			QueryResult VIPItemQery = WorldDatabase.Query("SELECT entry, vip FROM item_template;");
 
 			if (VIPItemQery)
@@ -93,7 +77,7 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 				{
 					Field* fields = VIPItemQery->Fetch();
 					uint32 item_id = fields[0].GetUInt32();
-					uint32 vip = fields[1].GetUInt32();
+					uint8 vip = fields[1].GetUInt32();
 
 					ItemVIP& data1 = ItemVip[item_id];
 					// Save the DB values to the MyData object
@@ -103,12 +87,14 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 				} while (VIPItemQery->NextRow());
 			}
 
+			HearthStone.clear();
 			QueryResult gpsQery = WorldDatabase.Query("SELECT * FROM hearthstone;");
 
 			if (gpsQery)
 			{
 				do
 				{
+
 					// unpacks the results of `result` into fields and appoint data to variable.
 					Field* fields = gpsQery->Fetch();
 					uint32 guid = fields[0].GetUInt32();
@@ -160,7 +146,7 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 };
 
 // VIP最大等级
-uint32 VIP::GetVIPMAX()
+uint8 VIP::GetVIPMAX()
 {
 	return VIP_MAX;
 };
@@ -172,7 +158,7 @@ float VIP::GetVIPOFFSET()
 };
 
 // VIP天赋加成
-uint32 VIP::GetTALENTBONUS()
+uint8 VIP::GetTALENTBONUS()
 {
 	return VIP_TP_BONUS;
 };
@@ -184,7 +170,7 @@ float VIP::GetVIPLootMoneyBonus()
 }
 
 // 获取物品vip等级
-uint32 VIP::GetItemVIP(uint32 item_id)
+uint8 VIP::GetItemVIP(uint32 item_id)
 {
 	return ItemVip[item_id].vip;
 };
@@ -202,15 +188,16 @@ void VIP::SetHearthStone(uint32 guid, uint32 map_id, float x, float y, float z, 
 	data.y = y;
 	data.z = z;
 	data.o = o;
+
 }
 
 // 获得玩家VIP
-uint32 VIP::GetVIP(uint32 acct_id)
+uint8 VIP::GetVIP(uint32 acct_id)
 {
 	return Vip[acct_id].vip;
 };
 
-void VIP::SetVIP(uint32 acct_id, uint32 pvip)
+void VIP::SetVIP(uint32 acct_id, uint8 pvip)
 {
 	Vip[acct_id].vip = pvip;
 
@@ -242,14 +229,6 @@ class Machinist_VIP_Account_Engine : public AccountScript
 {
 public: Machinist_VIP_Account_Engine() : AccountScript("Machinist_VIP_Account_Engine"){ };
 
-		void OnAccountLogout(uint32 accountId) override
-		{
-			TC_LOG_INFO("server.loading", "ACCOUNT::LOGOUT ID:%u VIP:%u", accountId, Vip[accountId].vip);
-
-			Vip.erase(accountId);
-
-		}
-
 		void OnAccountLogin(uint32 accountId) override
 		{
 			if (accountId > 0)
@@ -267,7 +246,7 @@ public: Machinist_VIP_Account_Engine() : AccountScript("Machinist_VIP_Account_En
 				{
 					// unpacks the results of `result` into fields and appoint data to variable.
 					Field* fields = result->Fetch();
-					uint32 pvip = fields[0].GetUInt32();
+					uint8 pvip = fields[0].GetUInt8();
 					uint32 pjf = fields[1].GetUInt32();
 
 					VipElements& data = Vip[accountId]; // like Lua table VIP[acctId].vip
@@ -292,8 +271,8 @@ public: Machinist_VIP_Player_Engine() : PlayerScript("Machinist_VIP_Player_Engin
 
 			uint32 guid = player->GetGUID();
 			uint32 acct_id = player->GetSession()->GetAccountId();
-			uint32 Pvip = VIP::GetVIP(acct_id);
-			uint32 Tp_Bonus = VIP::GetTALENTBONUS();
+			uint8 Pvip = VIP::GetVIP(acct_id);
+			uint8 Tp_Bonus = VIP::GetTALENTBONUS();
 			uint32 jf = VIP::GetPlayerJf(acct_id);
 
 			ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());
@@ -309,13 +288,23 @@ public: Machinist_VIP_Player_Engine() : PlayerScript("Machinist_VIP_Player_Engin
 				VIP::SetHearthStone(guid, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 			}
 		};
+
+		void OnLogout(Player* player)override
+		{
+			uint32 acct_id = player->GetSession()->GetAccountId();
+			uint8 Pvip = VIP::GetVIP(acct_id);
+
+			TC_LOG_INFO("server.loading", "ACCOUNT::LOGOUT ID:%u VIP:%u", acct_id, Pvip);
+
+			Vip.erase(acct_id);
+		}
 };
 
 bool VIP::VipSetHearthstone(Player* player)
 {
 
 	uint32 acctId = player->GetSession()->GetAccountId();
-	uint32 Pvip = VIP::GetVIP(acctId);
+	uint8 Pvip = VIP::GetVIP(acctId);
 
 
 	if (player->IsInCombat())
@@ -349,7 +338,7 @@ bool VIP::VipSetHearthstone(Player* player)
 bool VIP::VipHearthstone(Player* player)
 {
 	uint32 acctId = player->GetSession()->GetAccountId();
-	uint32 Pvip = VIP::GetVIP(acctId);
+	uint8 Pvip = VIP::GetVIP(acctId);
 	uint32 guid = player->GetGUID();
 
 	if (player->IsInCombat())
@@ -400,8 +389,8 @@ void RemoveItem(uint32 itemEntry, Player* player, uint32 amount)
 {
 	uint32 guid = player->GetGUID();
 	uint32 acct_id = player->GetSession()->GetAccountId();
-	uint32 Pvip = VIP::GetVIP(acct_id);
-	uint32 Tp_Bonus = VIP::GetTALENTBONUS();
+	uint8 Pvip = VIP::GetVIP(acct_id);
+	uint8 Tp_Bonus = VIP::GetTALENTBONUS();
 	player->DestroyItemCount(itemEntry, amount, true);
 
 	ChatHandler(player->GetSession()).PSendSysMessage("%s恭喜您, VIP提升一级, 要继续努力哦, 再次上线生效!", green.c_str());
@@ -423,20 +412,20 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 		bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) override
 		{
 			uint32 acct_id = player->GetSession()->GetAccountId();
-			uint32 pVip = VIP::GetVIP(acct_id);
-			uint32 upgradeItemCount = pVip + 1;
+			uint8 pVip = VIP::GetVIP(acct_id);
+			uint8 upgradeItemCount = pVip + 1;
 			uint32 jf = VIP::GetPlayerJf(acct_id);
 
 			// 获取消耗物品链接
 			WorldSession* session = player->GetSession();
-			std::string VIPUpgradeLink = sResetRandomItem->GetItemLink(VIP_UPGRADEITEM_ID, session);
+			std::string VIPUpgradeLink = sMachinistCore->GetItemLink(VIP_UPGRADEITEM_ID, session);
 
 			// 拼提示字符
-			std::string message_1 = "|cff00cc00提升VIP等级需要消耗: \n" + VIPUpgradeLink + " x " + ConvertNumberToString(upgradeItemCount) + "\n|cff00cc00你确定这么操作么?";
+			std::string message_1 = "|cff00cc00提升VIP等级需要消耗: \n" + VIPUpgradeLink + " x " + sMachinistCore->ConvertNumberToString(upgradeItemCount) + "\n|cff00cc00你确定这么操作么?";
 
-			std::string message_2 = "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ************ " + ConvertNumberToString(pVip) + "级  ************";
+			std::string message_2 = "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ************ " + sMachinistCore->ConvertNumberToString(pVip) + "级  ************";
 
-			std::string message_3 = "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********      " + ConvertNumberToString(jf) + "     ********";
+			std::string message_3 = "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********      " + sMachinistCore->ConvertNumberToString(jf) + "     ********";
 
 
 			player->PlayerTalkClass->ClearMenus();
@@ -474,12 +463,12 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			player->PlayerTalkClass->ClearMenus();
 
 			uint32 acct_id = player->GetSession()->GetAccountId();
-			uint32 pVip = VIP::GetVIP(acct_id);
-			uint32 upgradeItemCount = pVip + 1;
+			uint8 pVip = VIP::GetVIP(acct_id);
+			uint8 upgradeItemCount = pVip + 1;
 			uint32 jf = VIP::GetPlayerJf(acct_id);
 
 			WorldSession* session = player->GetSession();
-			std::string VIPUpgradeLink = sResetRandomItem->GetItemLink(VIP_UPGRADEITEM_ID, session);
+			std::string VIPUpgradeLink = sMachinistCore->GetItemLink(VIP_UPGRADEITEM_ID, session);
 			switch (action)
 			{
 			case GOSSIP_ACTION_INFO_DEF:

@@ -21,9 +21,8 @@
 #include "SharedDefines.h"
 #include "Transaction.h"
 #include "WorldSession.h"
-#include <sstream>
-#include <string>
 #include "resetRandomItem.h"
+#include "MachinistCore\MachinistCore.h"
 #pragma execution_character_set("UTF-8")
 
 
@@ -93,13 +92,13 @@ public:
 		Item* oldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
 
 		// 读取配置文件
-		uint32 randomItemEntry = sConfigMgr->GetIntDefault("randomItemEntry", 60005);
-		uint32 randomItemCount = sConfigMgr->GetIntDefault("randomItemCount", 1);
+		int randomItemEntry = sConfigMgr->GetIntDefault("randomItemEntry", 60005);
+		int randomItemCount = sConfigMgr->GetIntDefault("randomItemCount", 1);
 
 		// 拼字符串
 		std::ostringstream ss;
 		ss << std::endl;
-		ss << std::endl << sResetRandomItem->GetItemLink(randomItemEntry, session) << " x " << randomItemCount << std::endl;
+		ss << std::endl << sMachinistCore->GetItemLink(randomItemEntry, session) << " x " << randomItemCount << std::endl;
 		std::string message_1 = "重置随机附魔需要消耗\n" + ss.str() + "你确定这么操作么?";
 
 
@@ -122,7 +121,7 @@ public:
 				OnGossipHello(player, creature);
 				return;
 			}
-			player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sResetRandomItem->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0) + sResetRandomItem->GetItemLink(newItem, session), GOSSIP_SENDER_MAIN, newItem->GetGUID().GetCounter(), "将要重置的装备\n" + sResetRandomItem->GetItemIcon(newItem->GetEntry(), 20, 20, -15, -10) + sResetRandomItem->GetItemLink(newItem, session) + message_1, 0, false);
+			player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sMachinistCore->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0) + sMachinistCore->GetItemLink(newItem, session), GOSSIP_SENDER_MAIN, newItem->GetGUID().GetCounter(), "将要重置的装备\n" + sMachinistCore->GetItemIcon(newItem->GetEntry(), 20, 20, -15, -10) + sMachinistCore->GetItemLink(newItem, session) + message_1, 0, false);
 
 		}
 		else
