@@ -15,10 +15,9 @@
 #include "MachinistCore\MachinistCore.h"
 #include "WorldSession.h"
 
-// color definitions since i hate yellow..
 std::string green = "|cff00cc00";
 std::string white = "|cffFFFFFF";
-float ver = 1.00f;
+float ver = 2.00f;
 uint8 VIP_MAX;
 uint8 VIP_TP_BONUS;
 uint32 VIP_UPGRADEITEM_ID;
@@ -26,11 +25,6 @@ uint8 VIP_CANUSETELEPORTLEVEL;
 int VIP_TELEPORT_COST;
 float VIP_OFFSET;
 float VIP_MONEY_BONUS;
-
-std::unordered_map<uint32, VipElements> Vip;
-std::unordered_map<uint32, ItemVIP> ItemVip;
-std::unordered_map<uint32, VipHearthStoneGPS> HearthStone;
-
 
 VIP::VIP() { }
 
@@ -67,55 +61,6 @@ public: VIP_Load_Conf() : WorldScript("VIP_Load_Conf"){ };
 			TC_LOG_INFO("server.loading", "|_________________________________|");
 			TC_LOG_INFO("server.loading", "|-                               -|");
 			TC_LOG_INFO("server.loading", "|____________Ver:%.1f_____________|", ver);
-
-			ItemVip.clear();
-			QueryResult VIPItemQery = WorldDatabase.Query("SELECT entry, vip FROM item_template;");
-
-			if (VIPItemQery)
-			{
-				do
-				{
-					Field* fields = VIPItemQery->Fetch();
-					uint32 item_id = fields[0].GetUInt32();
-					uint8 vip = fields[1].GetUInt32();
-
-					ItemVIP& data1 = ItemVip[item_id];
-					// Save the DB values to the MyData object
-					data1.item_id = item_id;
-					data1.vip = vip;
-
-				} while (VIPItemQery->NextRow());
-			}
-
-			HearthStone.clear();
-			QueryResult gpsQery = WorldDatabase.Query("SELECT * FROM hearthstone;");
-
-			if (gpsQery)
-			{
-				do
-				{
-
-					// unpacks the results of `result` into fields and appoint data to variable.
-					Field* fields = gpsQery->Fetch();
-					uint32 guid = fields[0].GetUInt32();
-					uint32 map_id = fields[1].GetUInt32();
-					float x = fields[2].GetFloat();
-					float y = fields[3].GetFloat();
-					float z = fields[4].GetFloat();
-					float o = fields[5].GetFloat();
-
-					VipHearthStoneGPS& data3 = HearthStone[guid];
-					// Save the DB values to the MyData object
-					data3.guid = guid;
-					data3.map_id = map_id;
-					data3.x = x;
-					data3.y = y;
-					data3.z = z;
-					data3.o = o;
-
-				} while (gpsQery->NextRow());
-			}
-
 			TC_LOG_INFO("server.loading", "___________________________________");
 			TC_LOG_INFO("server.loading", "|   VIP Teleport GPS's : Loaded   |");
 
@@ -172,35 +117,47 @@ float VIP::GetVIPLootMoneyBonus()
 // 获取物品vip等级
 uint8 VIP::GetItemVIP(uint32 item_id)
 {
-	return ItemVip[item_id].vip;
+	/*return ItemVip[item_id].vip;*/
+	QueryResult VIPItemQery = WorldDatabase.PQuery("SELECT vip FROM item_template WHERE entry = %u;", item_id);
+
+	if (!VIPItemQery)
+	{
+		return 0;
+	}
+	else
+	{
+		Field * vipItemdb = VIPItemQery->Fetch();
+		uint8 itemVip = vipItemdb[0].GetInt8();
+		return itemVip;
+	}
 };
 
 // 设置瞬飞
 void VIP::SetHearthStone(uint32 guid, uint32 map_id, float x, float y, float z, float o)
 {
 	WorldDatabase.PExecute("REPLACE INTO `hearthstone` SET `guid`='%u', `map_id`='%u', `x`='%f', `y`='%f', `z`='%f', `o`='%f';", guid, map_id, x, y, z, o);
-
-	VipHearthStoneGPS& data = HearthStone[guid];
-	// Save the DB values to the MyData object
-	data.guid = guid;
-	data.map_id = map_id;
-	data.x = x;
-	data.y = y;
-	data.z = z;
-	data.o = o;
-
 }
 
 // 获得玩家VIP
 uint8 VIP::GetVIP(uint32 acct_id)
 {
-	return Vip[acct_id].vip;
+	//return Vip[acct_id].vip;
+	QueryResult accVipResult = LoginDatabase.PQuery("SELECT vip FROM account WHERE id = %u", acct_id);
+
+	if (!accVipResult)
+	{
+		return 0;
+	}
+	else
+	{
+		Field *accVIpdb = accVipResult->Fetch();
+		uint8 accVip = accVIpdb[0].GetInt8();
+		return accVip;
+	}
 };
 
 void VIP::SetVIP(uint32 acct_id, uint8 pvip)
 {
-	Vip[acct_id].vip = pvip;
-
 	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_VIP);
 	stmt->setUInt32(0, pvip);
 	stmt->setUInt32(1, acct_id);
@@ -208,58 +165,31 @@ void VIP::SetVIP(uint32 acct_id, uint8 pvip)
 };
 
 // 获得玩家积分
-uint32 VIP::GetPlayerJf(uint32 acct_id)
+int32 VIP::GetPlayerJf(uint32 acct_id)
 {
-	return Vip[acct_id].jf;
+	//return Vip[acct_id].jf;
+	QueryResult accVipResult = LoginDatabase.PQuery("SELECT jf FROM account WHERE id = %u", acct_id);
+
+	if (!accVipResult)
+	{
+		return 0;
+	}
+	else
+	{
+		Field *accJfdb = accVipResult->Fetch();
+		int32 accJf = accJfdb[0].GetInt32();
+		return accJf;
+	}
 };
 
-void VIP::SetPlayerJf(uint32 acct_id, uint32 jf)
+void VIP::SetPlayerJf(uint32 acct_id, int32 jf)
 {
-	Vip[acct_id].jf = jf;
-
 	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_JF);
 	stmt->setUInt32(0, jf);
 	stmt->setUInt32(1, acct_id);
 	LoginDatabase.Execute(stmt);
-
 };
 
-
-class Machinist_VIP_Account_Engine : public AccountScript
-{
-public: Machinist_VIP_Account_Engine() : AccountScript("Machinist_VIP_Account_Engine"){ };
-
-		void OnAccountLogin(uint32 accountId) override
-		{
-			if (accountId > 0)
-			{
-				PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_LOAD_VIP);
-				stmt->setUInt32(0, accountId);
-				PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-				if (!result)
-				{
-					TC_LOG_INFO("server.loading", "XX ERROR Loading a VIP table ID %u XX", accountId);
-				};
-
-				if (result)
-				{
-					// unpacks the results of `result` into fields and appoint data to variable.
-					Field* fields = result->Fetch();
-					uint8 pvip = fields[0].GetUInt8();
-					uint32 pjf = fields[1].GetUInt32();
-
-					VipElements& data = Vip[accountId]; // like Lua table VIP[acctId].vip
-					// Save the DB values to the MyData object
-					data.vip = pvip;
-					data.jf = pjf;
-					VIP::SetVIP(accountId, pvip);
-
-					TC_LOG_INFO("server.loading", "ACCOUNT::LOGIN ID:%u VIP:%u", accountId, Vip[accountId].vip);
-				}
-			}
-		}
-};
 
 class Machinist_VIP_Player_Engine : public PlayerScript
 {
@@ -267,37 +197,32 @@ public: Machinist_VIP_Player_Engine() : PlayerScript("Machinist_VIP_Player_Engin
 
 		void OnLogin(Player* player, bool firstLogin) override
 		{
+			
 			AnnounceLoggingToWorld(player, 1);
 
-			uint32 guid = player->GetGUID();
+			uint32 guid = player->GetGUID().GetCounter();
 			uint32 acct_id = player->GetSession()->GetAccountId();
 			uint8 Pvip = VIP::GetVIP(acct_id);
 			uint8 Tp_Bonus = VIP::GetTALENTBONUS();
-			uint32 jf = VIP::GetPlayerJf(acct_id);
+			int32 jf = VIP::GetPlayerJf(acct_id);
 
 			ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());
-			ChatHandler(player->GetSession()).PSendSysMessage("%s*欢迎您! 亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Vip[acct_id].vip, green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
+			ChatHandler(player->GetSession()).PSendSysMessage("%s*欢迎您! 亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Pvip, green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受装备属性加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_OFFSET * 100)*Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受天赋加成为: %s%u%s 点", green.c_str(), white.c_str(), uint32(Tp_Bonus)*Pvip, green.c_str());
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受金钱掉率加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_MONEY_BONUS * 100)*Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受强化成功概率提升: %s%u%s ", green.c_str(), white.c_str(), Pvip, "%");
 			ChatHandler(player->GetSession()).PSendSysMessage("%s*您的帐号积分余额为: %s%u%s 点", green.c_str(), white.c_str(), jf, green.c_str());
 			ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());
-			if (HearthStone[guid].guid != guid)
+
+			QueryResult gpsQery = WorldDatabase.PQuery("SELECT map_id, x, y, z, o FROM hearthstone WHERE guid = %u;", guid);
+
+			if (!gpsQery)
 			{
-				VIP::SetHearthStone(guid, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+				WorldDatabase.PExecute("INSERT INTO hearthstone (guid, map_id, x, y, z, o) VALUES (%u, %u, %f, %f, %f, %f);", guid, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 			}
 		};
 
-		void OnLogout(Player* player)override
-		{
-			uint32 acct_id = player->GetSession()->GetAccountId();
-			uint8 Pvip = VIP::GetVIP(acct_id);
-
-			TC_LOG_INFO("server.loading", "ACCOUNT::LOGOUT ID:%u VIP:%u", acct_id, Pvip);
-
-			Vip.erase(acct_id);
-		}
 };
 
 bool VIP::VipSetHearthstone(Player* player)
@@ -327,7 +252,6 @@ bool VIP::VipSetHearthstone(Player* player)
 	}
 	// save only in non-flight case
 	else
-		player->SaveRecallPosition();
 
 	VIP::SetHearthStone(player->GetGUID(), player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*****亲爱的玩家 %s%s%s , 您设置的地点已经保存*****", green.c_str(), white.c_str(), player->GetName(), green.c_str());
@@ -339,7 +263,7 @@ bool VIP::VipHearthstone(Player* player)
 {
 	uint32 acctId = player->GetSession()->GetAccountId();
 	uint8 Pvip = VIP::GetVIP(acctId);
-	uint32 guid = player->GetGUID();
+	uint32 guid = player->GetGUID().GetCounter();
 
 	if (player->IsInCombat())
 	{
@@ -360,23 +284,18 @@ bool VIP::VipHearthstone(Player* player)
 		player->CleanupAfterTaxiFlight();
 	}
 
-	if (HearthStone[guid].guid != guid)
+
+	QueryResult gpsQery = WorldDatabase.PQuery("SELECT map_id, x, y, z, o FROM hearthstone WHERE guid = %u;", guid);
+
+	if (gpsQery)
 	{
-		WorldDatabase.PExecute("REPLACE INTO hearthstone SET `guid`='%u';", guid);
-
-		VIP::SetHearthStone(guid, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-
-		ChatHandler(player->GetSession()).PSendSysMessage("%s*****亲爱的玩家, 你需要设定一个顺飞的地点, 才可以使用该功能哦!*****", green.c_str());
-		ChatHandler(player->GetSession()).PSendSysMessage("%s*****使用当前地点为顺飞目的地, 点击顺飞按钮, 即可传送至当前位置*****", green.c_str());
-		return false;
-	}
-
-	if (HearthStone[guid].guid == guid)
-	{
-		// save only in non-flight case and a location is stored
-		player->SaveRecallPosition();
-
-		player->TeleportTo(HearthStone[guid].map_id, HearthStone[guid].x, HearthStone[guid].y, HearthStone[guid].z, HearthStone[guid].o);
+			Field* fields = gpsQery->Fetch();
+			uint32 map_id = fields[0].GetUInt32();
+			float x = fields[1].GetFloat();
+			float y = fields[2].GetFloat();
+			float z = fields[3].GetFloat();
+			float o = fields[4].GetFloat();
+			player->TeleportTo(map_id, x, y, z, o);
 		return true;
 	}
 	return true;
@@ -387,15 +306,16 @@ bool VIP::VipHearthstone(Player* player)
 
 void RemoveItem(uint32 itemEntry, Player* player, uint32 amount)
 {
-	uint32 guid = player->GetGUID();
+	uint32 guid = player->GetGUID().GetCounter();
 	uint32 acct_id = player->GetSession()->GetAccountId();
 	uint8 Pvip = VIP::GetVIP(acct_id);
+	Pvip = Pvip + 1;
 	uint8 Tp_Bonus = VIP::GetTALENTBONUS();
 	player->DestroyItemCount(itemEntry, amount, true);
 
 	ChatHandler(player->GetSession()).PSendSysMessage("%s恭喜您, VIP提升一级, 要继续努力哦, 再次上线生效!", green.c_str());
 	ChatHandler(player->GetSession()).PSendSysMessage("%s***********************************************************************", green.c_str());
-	ChatHandler(player->GetSession()).PSendSysMessage("%s*亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Vip[acct_id].vip, green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
+	ChatHandler(player->GetSession()).PSendSysMessage("%s*亲爱的玩家 %s%s\n%s*您当前VIP等级为: %s%u %s级\n%s*目前系统最高VIP等级为: %s%u %s级", green.c_str(), white.c_str(), player->GetName().c_str(), green.c_str(), white.c_str(), Pvip ,green.c_str(), green.c_str(), white.c_str(), VIP_MAX, green.c_str());
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受装备属性加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_OFFSET * 100)*Pvip, "%");
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受天赋加成为: %s%u%s 点", green.c_str(), white.c_str(), uint32(Tp_Bonus)*Pvip, green.c_str());
 	ChatHandler(player->GetSession()).PSendSysMessage("%s*您当前享受金钱掉率加成为: %s%u%s", green.c_str(), white.c_str(), uint32(VIP_MONEY_BONUS * 100)*Pvip, "%");
@@ -414,7 +334,7 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			uint32 acct_id = player->GetSession()->GetAccountId();
 			uint8 pVip = VIP::GetVIP(acct_id);
 			uint8 upgradeItemCount = pVip + 1;
-			uint32 jf = VIP::GetPlayerJf(acct_id);
+			int32 jf = VIP::GetPlayerJf(acct_id);
 
 			// 获取消耗物品链接
 			WorldSession* session = player->GetSession();
@@ -429,43 +349,42 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 
 
 			player->PlayerTalkClass->ClearMenus();
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******尊敬的VIP玩家*******", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******您当前VIP等级*******", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, message_2, VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******账户积分数量*******", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, message_3, VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******尊敬的VIP玩家*******", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******您当前VIP等级*******", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, message_2, acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******账户积分数量*******", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, message_3, acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
 
 			if (VIP_MAX > pVip)
 			{
-				player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********提升VIP等级********", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 1, message_1, 0, false);
+				player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********提升VIP等级********", acct_id, GOSSIP_ACTION_INFO_DEF + 1, message_1, 0, false);
 			}
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********设置顺飞地点*******", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 2);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******顺飞消耗25银币*****", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM_EXTENDED(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********传送顺飞地点*******", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 3, "使用顺飞功能需要消耗1点积分\n你确定要这么操作么?", 0, false);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ****10积分兑换10金币****", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 4);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ***100积分兑换100金币***", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 5);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *1000积分兑换1000金币*", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF + 6);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
-			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 **********关闭菜单**********", VIP_UPGRADEITEM_ID, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********设置顺飞地点*******", acct_id, GOSSIP_ACTION_INFO_DEF + 2);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ******顺飞消耗25银币*****", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM_EXTENDED(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ********传送顺飞地点*******", acct_id, GOSSIP_ACTION_INFO_DEF + 3, "使用顺飞功能需要消耗1点积分\n你确定要这么操作么?", 0, false);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ****10积分兑换10金币****", acct_id, GOSSIP_ACTION_INFO_DEF + 4);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 ***100积分兑换100金币***", acct_id, GOSSIP_ACTION_INFO_DEF + 5);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *1000积分兑换1000金币*", acct_id, GOSSIP_ACTION_INFO_DEF + 6);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 *******************************", acct_id, GOSSIP_ACTION_INFO_DEF);
+			player->ADD_GOSSIP_ITEM(2, "|TInterface/ICONS/INV_Misc_Book_11:28:28:-18:0|t|cFF330066 **********关闭菜单**********", acct_id, GOSSIP_ACTION_INFO_DEF);
 			player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, item->GetGUID());
 
 			return false;
 		}
 
-		bool OnGossipSelect(Player* player, Item* item, uint32 VIP_UPGRADEITEM_ID, uint32 action) override
+		bool OnGossipSelect(Player* player, Item* item, uint32 acct_id, uint32 action) override
 		{
 			player->PlayerTalkClass->ClearMenus();
 
-			uint32 acct_id = player->GetSession()->GetAccountId();
 			uint8 pVip = VIP::GetVIP(acct_id);
 			uint8 upgradeItemCount = pVip + 1;
-			uint32 jf = VIP::GetPlayerJf(acct_id);
+			int32 jf = VIP::GetPlayerJf(acct_id);
 
 			WorldSession* session = player->GetSession();
 			std::string VIPUpgradeLink = sMachinistCore->GetItemLink(VIP_UPGRADEITEM_ID, session);
@@ -481,7 +400,7 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			{
 				if (player->HasItemCount(VIP_UPGRADEITEM_ID, upgradeItemCount))
 				{
-					VIP::SetVIP(acct_id, pVip + 1);
+					VIP::SetVIP(acct_id, upgradeItemCount);
 					RemoveItem(VIP_UPGRADEITEM_ID, player, upgradeItemCount);
 				}
 				else
@@ -517,7 +436,8 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			{
 				if (jf >= 10)
 				{
-					VIP::SetPlayerJf(acct_id, jf - 10);
+					int32 jfc = jf - 10;
+					VIP::SetPlayerJf(acct_id,  jfc);
 					player->ModifyMoney(100000);
 					player->CLOSE_GOSSIP_MENU();
 					ChatHandler(player->GetSession()).PSendSysMessage("扣除10点积分, 获得10个金币!");
@@ -533,7 +453,8 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			{
 				if (jf >= 100)
 				{
-					VIP::SetPlayerJf(acct_id, jf - 100);
+					int32 jfc = jf - 100;
+					VIP::SetPlayerJf(acct_id, jfc);
 					player->ModifyMoney(1000000);
 					player->CLOSE_GOSSIP_MENU();
 					ChatHandler(player->GetSession()).PSendSysMessage("扣除100点积分, 获得100个金币!");
@@ -549,7 +470,8 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 			{
 				if (jf >= 1000)
 				{
-					VIP::SetPlayerJf(acct_id, jf - 1000);
+					int32 jfc = jf - 1000;
+					VIP::SetPlayerJf(acct_id, jfc);
 					player->ModifyMoney(10000000);
 					player->CLOSE_GOSSIP_MENU();
 					ChatHandler(player->GetSession()).PSendSysMessage("扣除1000点积分, 获得1000个金币!");
@@ -572,7 +494,6 @@ public: VIP_Stone_Script() : ItemScript("VIP_Stone_Script"){ };
 void AddSC_Machinist_VIP_Core()
 {
 	new VIP_Load_Conf;
-	new Machinist_VIP_Account_Engine;
 	new Machinist_VIP_Player_Engine;
 	new VIP_Stone_Script;
 }
