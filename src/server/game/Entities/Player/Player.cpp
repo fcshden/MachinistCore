@@ -11882,6 +11882,18 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec &dest
 
 InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 {
+	// 穿戴需要VIP等级
+	uint32 acctId = GetSession()->GetAccountId();
+	uint8 Pvip = VIP::GetVIP(acctId);
+	uint8 Ivip = VIP::GetItemVIP(pItem->GetEntry());
+
+	if (Pvip < Ivip)
+	{
+		ChatHandler(GetSession()).PSendSysMessage("|cffFF0000您的VIP等级必须不小于 %u 级才可以使用这个物品|r", Ivip);
+		GetSession()->SendAreaTriggerMessage("|cffFF0000您的VIP等级必须不小于 %u 级才可以使用这个物品|r", Ivip);
+		return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+	}
+
     if (pItem)
     {
         TC_LOG_DEBUG("entities.player.items", "Player::CanUseItem: Player '%s' (%s),  Item: %u",
@@ -19733,8 +19745,8 @@ void Player::_SaveAuras(SQLTransaction& trans)
         stmt->setInt32(index++, baseDamage[0]);
         stmt->setInt32(index++, baseDamage[1]);
         stmt->setInt32(index++, baseDamage[2]);
-        stmt->setInt32(index++, itr->second->GetMaxDuration());
-        stmt->setInt32(index++, itr->second->GetDuration());
+		stmt->setInt32(index++, itr->second->GetMaxDuration());
+		stmt->setInt32(index++, itr->second->GetDuration());
         stmt->setUInt8(index, itr->second->GetCharges());
         trans->Append(stmt);
     }
@@ -24624,6 +24636,170 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     data << uint32(title->bit_index);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
+}
+
+void SetQuestState(Player* player, uint8 statNum, uint32 val, bool apply)
+{
+	if (apply)
+	{
+		switch (statNum)
+		{
+		case ITEM_MOD_MANA:
+			player->HandleStatModifier(UNIT_MOD_MANA, BASE_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_HEALTH:                           // modify HP
+			player->HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_AGILITY:                          // modify agility
+			player->HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
+			player->ApplyStatBuffMod(STAT_AGILITY, float(val), apply);
+			break;
+		case ITEM_MOD_STRENGTH:                         //modify strength
+			player->HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
+			player->ApplyStatBuffMod(STAT_STRENGTH, float(val), apply);
+			break;
+		case ITEM_MOD_INTELLECT:                        //modify intellect
+			player->HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
+			player->ApplyStatBuffMod(STAT_INTELLECT, float(val), apply);
+			break;
+		case ITEM_MOD_SPIRIT:                           //modify spirit
+			player->HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
+			player->ApplyStatBuffMod(STAT_SPIRIT, float(val), apply);
+			break;
+		case ITEM_MOD_STAMINA:                          //modify stamina
+			player->HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
+			player->ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
+			break;
+		case ITEM_MOD_DEFENSE_SKILL_RATING:
+			player->ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
+			break;
+		case ITEM_MOD_DODGE_RATING:
+			player->ApplyRatingMod(CR_DODGE, int32(val), apply);
+			break;
+		case ITEM_MOD_PARRY_RATING:
+			player->ApplyRatingMod(CR_PARRY, int32(val), apply);
+			break;
+		case ITEM_MOD_BLOCK_RATING:
+			player->ApplyRatingMod(CR_BLOCK, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_MELEE_RATING:
+			player->ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_RANGED_RATING:
+			player->ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_SPELL_RATING:
+			player->ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_MELEE_RATING:
+			player->ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_RANGED_RATING:
+			player->ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_SPELL_RATING:
+			player->ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
+			player->ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
+			player->ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
+			player->ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
+			player->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
+			player->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
+			player->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_MELEE_RATING:
+			player->ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_RANGED_RATING:
+			player->ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_SPELL_RATING:
+			player->ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_RATING:
+			player->ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_RATING:
+			player->ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HIT_TAKEN_RATING:
+			player->ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_CRIT_TAKEN_RATING:
+			player->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_RESILIENCE_RATING:
+			player->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_HASTE_RATING:
+			player->ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
+			player->ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
+			player->ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
+			break;
+		case ITEM_MOD_EXPERTISE_RATING:
+			player->ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
+			break;
+		case ITEM_MOD_ATTACK_POWER:
+			player->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(val), apply);
+			player->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
+			break;
+		case ITEM_MOD_RANGED_ATTACK_POWER:
+			player->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
+			break;
+			//            case ITEM_MOD_FERAL_ATTACK_POWER:
+			//                ApplyFeralAPBonus(int32(val), apply);
+			//                break;
+		case ITEM_MOD_MANA_REGENERATION:
+			player->ApplyManaRegenBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_ARMOR_PENETRATION_RATING:
+			player->ApplyRatingMod(CR_ARMOR_PENETRATION, int32(val), apply);
+			break;
+		case ITEM_MOD_SPELL_POWER:
+			player->ApplySpellPowerBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_HEALTH_REGEN:
+			player->ApplyHealthRegenBonus(int32(val), apply);
+			break;
+		case ITEM_MOD_SPELL_PENETRATION:
+			player->ApplySpellPenetrationBonus(val, apply);
+			break;
+		case ITEM_MOD_BLOCK_VALUE:
+			player->HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
+			break;
+			// deprecated item mods
+		case ITEM_MOD_SPELL_HEALING_DONE:
+		case ITEM_MOD_SPELL_DAMAGE_DONE:
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
 bool Player::isTotalImmunity() const
